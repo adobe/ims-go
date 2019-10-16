@@ -45,15 +45,14 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 	}
 
 	if url.Scheme == "" {
-		url.Scheme = "https"
+		return nil, fmt.Errorf("missing URL scheme")
+	}
+
+	if url.Host == "" {
+		return nil, fmt.Errorf("missing URL host")
 	}
 
 	url.User = nil
-
-	if url.Host == "" {
-		return nil, fmt.Errorf("URL host missing")
-	}
-
 	url.RawQuery = ""
 	url.Fragment = ""
 
