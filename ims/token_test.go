@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 
@@ -87,6 +88,14 @@ func TestToken(t *testing.T) {
 	}
 	if r.ExpiresIn != 3600*time.Second {
 		t.Errorf("invalid expiration: %v", r.ExpiresIn)
+	}
+	expectedMap := map[string]interface{}{
+		"access_token": r.AccessToken,
+		"refresh_token": r.RefreshToken,
+		"expires_in": float64(3600),
+	}
+	if reflect.DeepEqual(r.IMSRawResponse, expectedMap) != true {
+		t.Errorf("invalid IMSRawResponse: %v expected %v", r.IMSRawResponse, expectedMap)
 	}
 }
 

@@ -41,6 +41,8 @@ type TokenResponse struct {
 	RefreshToken string
 	// ExpiresIn is the expiration time of the access token.
 	ExpiresIn time.Duration
+	// Raw ims response
+	IMSRawResponse map[string]interface{}
 }
 
 // Token requests an access token.
@@ -78,19 +80,16 @@ func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 		return nil, errorResponse(res)
 	}
 
-	var payload struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-		ExpiresIn    int    `json:"expires_in"`
-	}
+	tokenMapResponse := make(map[string]interface{})
 
-	if err := json.NewDecoder(res.Body).Decode(&payload); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&tokenMapResponse); err != nil {
 		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	return &TokenResponse{
-		AccessToken:  payload.AccessToken,
-		RefreshToken: payload.RefreshToken,
-		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),
+		AccessToken:    tokenMapResponse["access_token"].(string),
+		RefreshToken:   tokenMapResponse["refresh_token"].(string),
+		ExpiresIn:      time.Second * time.Duration(tokenMapResponse["expires_in"].(float64)),
+		IMSRawResponse: tokenMapResponse,
 	}, nil
 }
