@@ -14,7 +14,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 	"time"
 
@@ -22,6 +21,8 @@ import (
 )
 
 func TestToken(t *testing.T) {
+	expectedUserId := "someRondomString"
+
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Fatalf("invalid method: %v", r.Method)
@@ -52,10 +53,12 @@ func TestToken(t *testing.T) {
 			ExpiresIn    int    `json:"expires_in"`
 			RefreshToken string `json:"refresh_token"`
 			AccessToken  string `json:"access_token"`
+			UserId       string `json:"userId"`
 		}{
 			ExpiresIn:    3600,
 			RefreshToken: "refreshToken",
 			AccessToken:  "accessToken",
+			UserId:       expectedUserId,
 		}
 
 		if err := json.NewEncoder(w).Encode(&body); err != nil {
@@ -89,13 +92,8 @@ func TestToken(t *testing.T) {
 	if r.ExpiresIn != 3600*time.Second {
 		t.Errorf("invalid expiration: %v", r.ExpiresIn)
 	}
-	expectedMap := map[string]interface{}{
-		"access_token": r.AccessToken,
-		"refresh_token": r.RefreshToken,
-		"expires_in": float64(3600),
-	}
-	if reflect.DeepEqual(r.IMSRawResponse, expectedMap) != true {
-		t.Errorf("invalid IMSRawResponse: %v expected %v", r.IMSRawResponse, expectedMap)
+	if r.UserId != expectedUserId {
+		t.Errorf("invalid userId: %v expected %v", r.UserId, expectedUserId)
 	}
 }
 
