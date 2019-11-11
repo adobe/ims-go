@@ -42,7 +42,7 @@ type TokenResponse struct {
 	// ExpiresIn is the expiration time of the access token.
 	ExpiresIn time.Duration
 	// User id received from IMS token
-	UserId string
+	UserID string
 }
 
 // Token requests an access token.
@@ -84,7 +84,7 @@ func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 		ExpiresIn    int    `json:"expires_in"`
-		UserId       string `json:"userId"`
+		UserID       string `json:"userId"`
 	}
 
 	if err := json.NewDecoder(res.Body).Decode(&payload); err != nil {
@@ -95,6 +95,6 @@ func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 		AccessToken:  payload.AccessToken,
 		RefreshToken: payload.RefreshToken,
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),
-		UserId:       payload.UserId,
+		UserID:       payload.UserID,
 	}, nil
 }
