@@ -27,6 +27,8 @@ const (
 	MetaScopeCloudManager MetaScope = iota
 	// MetaScopeAdobeIO is the meta-scope for Adobe IO
 	MetaScopeAdobeIO
+	// MetaScopeAnalyticsBulkIngest is the meta-scope for Analytics Bulk Ingest
+	MetaScopeAnalyticsBulkIngest
 )
 
 // ExchangeJWTRequest contains the data for exchanging a JWT token with an
@@ -77,6 +79,8 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 			claims[fmt.Sprintf("%v/s/ent_cloudmgr_sdk", c.url)] = true
 		case MetaScopeAdobeIO:
 			claims[fmt.Sprintf("%v/s/ent_adobeio_sdk", c.url)] = true
+		case MetaScopeAnalyticsBulkIngest:
+			claims[fmt.Sprintf("%v/s/ent_analytics_bulk_ingest_sdk", c.url)] = true
 		default:
 			return nil, fmt.Errorf("invalid meta-scope: %v", ms)
 		}
