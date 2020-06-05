@@ -27,7 +27,12 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return e.ErrorMessage
+	return fmt.Sprintf(
+		"error response: statusCode=%d, errorCode='%s', errorMessage='%s'",
+		e.StatusCode,
+		e.ErrorCode,
+		e.ErrorMessage,
+	)
 }
 
 // IsError checks if the given error is an IMS error and, if it is, returns an
