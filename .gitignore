@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/go,osx
 # Edit at https://www.gitignore.io/?templates=go,osx
 
@@ -54,3 +53,4 @@ Temporary Items
 # End of https://www.gitignore.io/api/go,osx
 
 .idea
+*.swp
