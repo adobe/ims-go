@@ -20,14 +20,22 @@ import (
 )
 
 // MetaScope is a meta-scope that can be optionally added to a JWT token.
+//
+// Deprecated: use explicit claims in ExchangeJWTRequest.
 type MetaScope int
 
 const (
-	// MetaScopeCloudManager is the meta-scope for Cloud Manager
+	// MetaScopeCloudManager is the meta-scope for Cloud Manager.
+	//
+	// Deprecated: use explicit claims in ExchangeJWTRequest.
 	MetaScopeCloudManager MetaScope = iota
-	// MetaScopeAdobeIO is the meta-scope for Adobe IO
+	// MetaScopeAdobeIO is the meta-scope for Adobe IO.
+	//
+	// Deprecated: use explicit claims in ExchangeJWTRequest.
 	MetaScopeAdobeIO
-	// MetaScopeAnalyticsBulkIngest is the meta-scope for Analytics Bulk Ingest
+	// MetaScopeAnalyticsBulkIngest is the meta-scope for Analytics Bulk Ingest.
+	//
+	// Deprecated: use explicit claims in ExchangeJWTRequest.
 	MetaScopeAnalyticsBulkIngest
 )
 
@@ -49,7 +57,11 @@ type ExchangeJWTRequest struct {
 	// The client secret.
 	ClientSecret string
 	// The additional meta-scopes to add to the JWT token.
+	//
+	// Deprecated: use explicit claims in ExchangeJWTRequest.
 	MetaScope []MetaScope
+	// Additional claims to add to the JWT token.
+	Claims map[string]interface{}
 }
 
 // ExchangeJWTResponse contains the response of a successful exchange of a JWT
@@ -84,6 +96,10 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 		default:
 			return nil, fmt.Errorf("invalid meta-scope: %v", ms)
 		}
+	}
+
+	for k, v := range r.Claims {
+		claims[k] = v
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
