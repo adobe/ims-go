@@ -147,28 +147,3 @@ func TestExchangeJWTError(t *testing.T) {
 		t.Fatalf("invalid error message: %v", imsErr.ErrorMessage)
 	}
 }
-
-func TestExchangeJWTInvalidMetaScope(t *testing.T) {
-	c, err := ims.NewClient(&ims.ClientConfig{
-		URL: "http://ims.endpoint",
-	})
-	if err != nil {
-		t.Fatalf("create client: %v", err)
-	}
-
-	_, err = c.ExchangeJWT(&ims.ExchangeJWTRequest{
-		PrivateKey:   newPrivateKey(t),
-		Expiration:   time.Now().Add(24 * time.Hour),
-		Issuer:       "organization",
-		Subject:      "technical-user",
-		ClientID:     "client-id",
-		ClientSecret: "client-secret",
-		MetaScope:    []ims.MetaScope{-1},
-	})
-	if err == nil {
-		t.Fatalf("expected error")
-	}
-	if err.Error() != "invalid meta-scope: -1" {
-		t.Fatalf("invalid error: %v", err)
-	}
-}

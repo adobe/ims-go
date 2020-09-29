@@ -19,18 +19,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// MetaScope is a meta-scope that can be optionally added to a JWT token.
-type MetaScope int
-
-const (
-	// MetaScopeCloudManager is the meta-scope for Cloud Manager
-	MetaScopeCloudManager MetaScope = iota
-	// MetaScopeAdobeIO is the meta-scope for Adobe IO
-	MetaScopeAdobeIO
-	// MetaScopeAnalyticsBulkIngest is the meta-scope for Analytics Bulk Ingest
-	MetaScopeAnalyticsBulkIngest
-)
-
 // ExchangeJWTRequest contains the data for exchanging a JWT token with an
 // access token.
 type ExchangeJWTRequest struct {
@@ -48,8 +36,8 @@ type ExchangeJWTRequest struct {
 	ClientID string
 	// The client secret.
 	ClientSecret string
-	// The additional meta-scopes to add to the JWT token.
-	MetaScope []MetaScope
+	// Additional claims to add to the JWT token.
+	Claims map[string]interface{}
 }
 
 // ExchangeJWTResponse contains the response of a successful exchange of a JWT
@@ -73,17 +61,8 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 		"aud": fmt.Sprintf("%s/c/%s", c.url, r.ClientID),
 	}
 
-	for _, ms := range r.MetaScope {
-		switch ms {
-		case MetaScopeCloudManager:
-			claims[fmt.Sprintf("%v/s/ent_cloudmgr_sdk", c.url)] = true
-		case MetaScopeAdobeIO:
-			claims[fmt.Sprintf("%v/s/ent_adobeio_sdk", c.url)] = true
-		case MetaScopeAnalyticsBulkIngest:
-			claims[fmt.Sprintf("%v/s/ent_analytics_bulk_ingest_sdk", c.url)] = true
-		default:
-			return nil, fmt.Errorf("invalid meta-scope: %v", ms)
-		}
+	for k, v := range r.Claims {
+		claims[k] = v
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
