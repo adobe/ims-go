@@ -34,7 +34,7 @@ func TestServerLogin(t *testing.T) {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/ims/authorize/v1", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/ims/authorize/v1", func(w http.ResponseWriter, r *http.Request) {
 		v := url.Values{}
 		v.Add("code", "code")
 		v.Add("state", r.URL.Query().Get("state"))
@@ -45,7 +45,7 @@ func TestServerLogin(t *testing.T) {
 		}
 
 		http.Redirect(w, r, u.String(), http.StatusFound)
-	}))
+	})
 
 	mux.Handle("/ims/token/v2", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{
@@ -119,7 +119,7 @@ func TestServerError(t *testing.T) {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/ims/authorize/v1", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/ims/authorize/v1", func(w http.ResponseWriter, r *http.Request) {
 		v := url.Values{}
 		v.Add("error", "error")
 
@@ -129,7 +129,7 @@ func TestServerError(t *testing.T) {
 		}
 
 		http.Redirect(w, r, u.String(), http.StatusFound)
-	}))
+	})
 
 	backend := httptest.NewServer(mux)
 	defer backend.Close()

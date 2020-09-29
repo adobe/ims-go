@@ -30,7 +30,7 @@ const (
 	GrantTypeDevice
 )
 
-// AuthorizeURLConfig is the configuration for building an uthorization URL.
+// AuthorizeURLConfig is the configuration for building an authorization URL.
 type AuthorizeURLConfig struct {
 	ClientID    string
 	GrantType   GrantType
@@ -50,12 +50,12 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 		return "", fmt.Errorf("missing scope")
 	}
 
-	url, err := url.Parse(fmt.Sprintf("%s/ims/authorize/v1", c.url))
+	apiURL, err := url.Parse(fmt.Sprintf("%s/ims/authorize/v1", c.url))
 	if err != nil {
 		return "", fmt.Errorf("parse URL: %v", err)
 	}
 
-	q := url.Query()
+	q := apiURL.Query()
 
 	q.Set("client_id", cfg.ClientID)
 	q.Set("scope", strings.Join(cfg.Scope, ","))
@@ -77,7 +77,7 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 		q.Set("state", cfg.State)
 	}
 
-	url.RawQuery = q.Encode()
+	apiURL.RawQuery = q.Encode()
 
-	return url.String(), nil
+	return apiURL.String(), nil
 }

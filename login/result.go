@@ -42,22 +42,22 @@ func (h *resultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var serr error
+	var serverErr error
 
 	if err, ok := r.Context().Value(contextKeyError).(error); ok {
-		serr = err
+		serverErr = err
 	} else {
-		serr = fmt.Errorf("neither error nor result returned")
+		serverErr = fmt.Errorf("neither error nor result returned")
 	}
 
 	if h.failureHandler != nil {
 		h.failureHandler.ServeHTTP(w, r)
 	} else {
-		fmt.Fprintf(w, "Error: %v", serr)
+		fmt.Fprintf(w, "Error: %v", serverErr)
 	}
 
 	select {
-	case h.errCh <- serr:
+	case h.errCh <- serverErr:
 		// Error sent.
 	case <-r.Context().Done():
 		// Request cancelled.

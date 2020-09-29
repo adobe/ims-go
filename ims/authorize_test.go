@@ -35,19 +35,19 @@ func TestAuthorizeURL(t *testing.T) {
 		t.Fatalf("authorize: %v", err)
 	}
 
-	url, err := url.Parse(u)
+	authURL, err := url.Parse(u)
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
 
-	if url.Scheme != "http" {
-		t.Errorf("invalid scheme: %v", url.Scheme)
+	if authURL.Scheme != "http" {
+		t.Errorf("invalid scheme: %v", authURL.Scheme)
 	}
-	if url.Host != "ims.endpoint" {
-		t.Errorf("invalid host: %v", url.Host)
+	if authURL.Host != "ims.endpoint" {
+		t.Errorf("invalid host: %v", authURL.Host)
 	}
 
-	q := url.Query()
+	q := authURL.Query()
 
 	if v := q.Get("client_id"); v != "clientID" {
 		t.Errorf("invalid client ID: %v", v)

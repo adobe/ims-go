@@ -29,7 +29,7 @@ import (
 //  // Start the service
 //  srv := login.NewServer(cfg)
 //
-//  // Listen on a spearate goroutine
+//  // Listen on a separate goroutine
 //  go srv.Serve(listener)
 //
 //  // Wait for a response.
@@ -123,7 +123,7 @@ func (s *Server) Serve(lst net.Listener) error {
 }
 
 // Shutdown closes the server and the channels returned from Error() and
-// Response(). When closing the server, this method has the same semantycs of
+// Response(). When closing the server, this method has the same semantics of
 // http.Server.Shutdown.
 func (s *Server) Shutdown(ctx context.Context) error {
 	defer close(s.errCh)

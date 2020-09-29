@@ -39,25 +39,25 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 		client = http.DefaultClient
 	}
 
-	url, err := url.Parse(cfg.URL)
+	endpointURL, err := url.Parse(cfg.URL)
 	if err != nil {
 		return nil, fmt.Errorf("malformed URL")
 	}
 
-	if url.Scheme == "" {
+	if endpointURL.Scheme == "" {
 		return nil, fmt.Errorf("missing URL scheme")
 	}
 
-	if url.Host == "" {
+	if endpointURL.Host == "" {
 		return nil, fmt.Errorf("missing URL host")
 	}
 
-	url.User = nil
-	url.RawQuery = ""
-	url.Fragment = ""
+	endpointURL.User = nil
+	endpointURL.RawQuery = ""
+	endpointURL.Fragment = ""
 
 	return &Client{
-		url:    url.String(),
+		url:    endpointURL.String(),
 		client: client,
 	}, nil
 }

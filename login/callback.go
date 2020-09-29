@@ -33,9 +33,9 @@ type callbackMiddleware struct {
 func (h *callbackMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
 
-	uerr := values.Get("error")
-	if uerr != "" {
-		serveError(h.next, w, r, fmt.Errorf("backend error: %s", uerr))
+	urlErr := values.Get("error")
+	if urlErr != "" {
+		serveError(h.next, w, r, fmt.Errorf("backend error: %s", urlErr))
 		return
 	}
 
