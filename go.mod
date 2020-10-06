@@ -8,7 +8,7 @@
 // OF ANY KIND, either express or implied. See the License for the specific language
 // governing permissions and limitations under the License.
 
-module github.com/adobe/ims-go
+module github.com/telegrapher/ims-go
 
 go 1.13
 
