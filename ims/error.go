@@ -13,6 +13,7 @@ package ims
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -48,8 +49,15 @@ func errorResponse(r *http.Response) error {
 		ErrorMessage string `json:"error_description"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		return fmt.Errorf("decode error response: %v", err)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return fmt.Errorf("error reading request body: %v", err)
+	}
+	if len(body) != 0 {
+		if err := json.Unmarshal(body,&payload); err != nil {
+			return fmt.Errorf("decode error response: %v", err)
+		}
+
 	}
 
 	return &Error{
