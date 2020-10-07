@@ -16,31 +16,42 @@ import (
 	"net/http"
 )
 
-// The user token is used to authorize the request and to define which user's profile is requested.
-func (c *Client) GetProfile(userToken string) (string, error){
+type GetProfileRequest struct {
+	AccessToken string
+}
 
-	// Create request
+type GetProfileResponse struct {
+	Body []byte
+}
+
+// The user token is used to authorize the request and to define which user's profile is requested.
+func (c *Client) GetProfile(r *GetProfileRequest) (*GetProfileResponse, error){
+
+	// Empty profile response
+	pr := &GetProfileResponse{}
+
+	// Create HTTP request
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/ims/profile/v1", c.url), nil)
 
 	// Add the user token as Bearer token
-	bearer := fmt.Sprintf("Bearer %v", userToken)
+	bearer := fmt.Sprintf("Bearer %v", r.AccessToken)
 	req.Header.Add("Authorization", bearer )
 
 	// Perform request
 	res, err := c.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("error requesting profile: %v", err)
+		return pr, fmt.Errorf("error requesting profile: %v", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return "", errorResponse(res)
+		return pr, errorResponse(res)
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", fmt.Errorf("error reading request body")
+		return pr, fmt.Errorf("error reading request body")
 	}
 
-	return string(bodyBytes), nil
+	return &GetProfileResponse{bodyBytes}, nil
 }
