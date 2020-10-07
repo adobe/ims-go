@@ -19,6 +19,8 @@ import (
 
 // Error is an error containing information returned by the IMS API.
 type Error struct {
+	// Body is the raw body returned by the server.
+	Body []byte
 	// StatusCode is the status code of the response returning the error.
 	StatusCode int
 	// ErrorCode is an error code associated with the error response.
@@ -51,16 +53,19 @@ func errorResponse(r *http.Response) error {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return fmt.Errorf("error reading request body: %v", err)
+		return fmt.Errorf("read response: %v", err)
 	}
-	if len(body) != 0 {
-		if err := json.Unmarshal(body,&payload); err != nil {
-			return fmt.Errorf("decode error response: %v", err)
-		}
 
-	}
+	// The error from json.Unmarshal() is voluntarily ignored. If the server
+	// returns an empty or badly serialized response, we just go on. The library
+	// did its best to extract meaningful information from the response. The
+	// unparsed body is returned to the user anyway, who will take the final
+	// decision about how to deal with this error.
+
+	_ = json.Unmarshal(body, &payload)
 
 	return &Error{
+		Body:         body,
 		StatusCode:   r.StatusCode,
 		ErrorCode:    payload.ErrorCode,
 		ErrorMessage: payload.ErrorMessage,
