@@ -13,6 +13,8 @@ package ims
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -67,8 +69,12 @@ type ExchangeJWTRequest struct {
 // ExchangeJWTResponse contains the response of a successful exchange of a JWT
 // token.
 type ExchangeJWTResponse struct {
+	// Body is the raw response body.
+	Body []byte
+	// AccessToken is the access token.
 	AccessToken string
-	ExpiresIn   time.Duration
+	// ExpiresIn is the expiration for the token.
+	ExpiresIn time.Duration
 }
 
 // ExchangeJWT exchanges a JWT token for an access token.
@@ -121,8 +127,13 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
+	}
+
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response: %v", err)
 	}
 
 	var body struct {
@@ -130,11 +141,12 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 		ExpiresIn   int    `json:"expires_in"`
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+	if err := json.Unmarshal(raw, &body); err != nil {
 		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	return &ExchangeJWTResponse{
+		Body:        raw,
 		AccessToken: body.AccessToken,
 		ExpiresIn:   time.Millisecond * time.Duration(body.ExpiresIn),
 	}, nil

@@ -13,6 +13,7 @@ package ims
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strings"
 	"time"
@@ -34,6 +35,8 @@ type RefreshTokenRequest struct {
 
 // RefreshTokenResponse is the response of an access token refresh.
 type RefreshTokenResponse struct {
+	// Body is the raw response body.
+	Body []byte
 	// AccessToken is the new access token.
 	AccessToken string
 	// RefreshToken is a new refresh token.
@@ -77,17 +80,23 @@ func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, er
 		return nil, errorResponse(res)
 	}
 
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response: %v", err)
+	}
+
 	var payload struct {
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 		ExpiresIn    int    `json:"expires_in"`
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&payload); err != nil {
+	if err := json.Unmarshal(raw, &payload); err != nil {
 		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	return &RefreshTokenResponse{
+		Body:         raw,
 		AccessToken:  payload.AccessToken,
 		RefreshToken: payload.RefreshToken,
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),

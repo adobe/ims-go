@@ -24,7 +24,7 @@ type GetProfileRequest struct {
 
 // GetProfileResponse is the response for GetProfile.
 type GetProfileResponse struct {
-	// Body is the raw body of the response returned when reading the profile.
+	// Body is the raw response body.
 	Body []byte
 }
 
