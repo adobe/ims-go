@@ -17,40 +17,30 @@ import (
 )
 
 // The user token is used to authorize the request and to define which user's profile is requested.
-type UserToken struct {
-	string
-}
+func (c *Client) GetProfile(userToken string) (string, error){
 
-type UserProfile struct{
-	string
-}
-
-func (c *Client) GetProfile(t *UserToken) (*UserProfile, error){
-
-	up := &UserProfile{}
 	// Create request
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/ims/profile/v1", c.url), nil)
 
 	// Add the user token as Bearer token
-	bearer := fmt.Sprintf("Bearer %v", *t)
+	bearer := fmt.Sprintf("Bearer %v", userToken)
 	req.Header.Add("Authorization", bearer )
 
 	// Perform request
 	res, err := c.client.Do(req)
 	if err != nil {
-		return up, fmt.Errorf("error requesting profile: %v", err)
+		return "", fmt.Errorf("error requesting profile: %v", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return up, errorResponse(res)
+		return "", errorResponse(res)
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return up, fmt.Errorf("error reading request body")
+		return "", fmt.Errorf("error reading request body")
 	}
-	up = &UserProfile{string(bodyBytes)}
 
-	return up, nil
+	return string(bodyBytes), nil
 }
