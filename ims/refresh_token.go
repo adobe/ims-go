@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -76,7 +77,7 @@ func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, er
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
 	}
 
