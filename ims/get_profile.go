@@ -20,6 +20,7 @@ import (
 type GetProfileRequest struct {
 	// AccessToken is a valid access token.
 	AccessToken string
+	ApiVersion string
 }
 
 // GetProfileResponse is the response for GetProfile.
@@ -31,7 +32,10 @@ type GetProfileResponse struct {
 // GetProfile reads the user profile associated to a given access token. It
 // returns a non-nil response on success or an error on failure.
 func (c *Client) GetProfile(r *GetProfileRequest) (*GetProfileResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/ims/profile/v1", c.url), nil)
+	if r.ApiVersion == "" {
+		r.ApiVersion = "v1"
+	}
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/ims/profile/%s", c.url, r.ApiVersion), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
