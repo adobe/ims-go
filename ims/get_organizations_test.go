@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestGetProfile(t *testing.T) {
+func TestGetOrganizations(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Fatalf("invalid method: %v", r.Method)
@@ -42,7 +42,7 @@ func TestGetProfile(t *testing.T) {
 		AccessToken: "accessToken",
 	})
 	if err != nil {
-		t.Fatalf("get profile: %v", err)
+		t.Fatalf("get organizations: %v", err)
 	}
 
 	if body := string(res.Body); body != `{"foo":"bar"}` {
@@ -50,7 +50,7 @@ func TestGetProfile(t *testing.T) {
 	}
 }
 
-func TestGetProfileEmptyErrorResponse(t *testing.T) {
+func TestGetOrganizationsEmptyErrorResponse(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
@@ -63,7 +63,7 @@ func TestGetProfileEmptyErrorResponse(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	res, err := c.GetProfile(&ims.GetProfileRequest{})
+	res, err := c.GetOrganizations(&ims.GetOrganizationsRequest{})
 	if res != nil {
 		t.Fatalf("non-nil response returned")
 	}
