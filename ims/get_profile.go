@@ -20,7 +20,7 @@ import (
 type GetProfileRequest struct {
 	// AccessToken is a valid access token.
 	AccessToken string
-	ApiVersion string
+	ApiVersion  string
 }
 
 // GetProfileResponse is the response for GetProfile.

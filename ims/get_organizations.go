@@ -20,7 +20,7 @@ import (
 type GetOrganizationsRequest struct {
 	// AccessToken is a valid access token.
 	AccessToken string
-	ApiVersion string
+	ApiVersion  string
 }
 
 // GetOrganizationsResponse is the response for GetOrganizations.
