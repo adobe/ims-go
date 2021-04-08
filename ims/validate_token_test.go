@@ -26,14 +26,20 @@ func TestValidateToken(t *testing.T) {
 		}
 
 		// X-IMS-ClientId header is mandatory
-		if h := r.Header.Get("X-IMS-ClientId"); h != "test_client_id" {
+		// This is the preferred implementation but it is not working at the moment
+		/*if h := r.Header.Get("X-IMS-ClientId"); h != "test_client_id" {
 			t.Fatalf("invalid X-IMS-ClientId header: %v", h)
+		}*/
+
+		clientIdParam, ok := r.URL.Query()["client_id"]
+		if !ok || clientIdParam[0] == "" {
+			t.Fatalf("missing mandatory client_id URL parameter")
 		}
 
 		// Token type URL parameter is mandatory
 		typeParam, ok := r.URL.Query()["type"]
 		if !ok || typeParam[0] == "" {
-			t.Fatalf("missing type parameter in the URL")
+			t.Fatalf("missing mandatory type URL parameter")
 		}
 		var tokenType = ims.TokenType(typeParam[0])
 

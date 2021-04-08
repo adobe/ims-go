@@ -51,12 +51,15 @@ func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse,
 	}
 
 	req, err := http.NewRequest(http.MethodGet,
-		fmt.Sprintf("%s/ims/validate/v1?type=%s", c.url, r.Type), nil)
+		fmt.Sprintf("%s/ims/validate_token/v1?type=%s&client_id=%s&token=%s",
+			c.url, r.Type, r.ClientID, r.Token), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
 
-	req.Header.Set("X-IMS-ClientId", r.ClientID)
+	// Setting this header is recommended in the documentation
+	// but it is not working, using client_id in the URL in the meantime
+	//req.Header.Set("X-IMS-ClientId", r.ClientID)
 
 	res, err := c.client.Do(req)
 	if err != nil {
