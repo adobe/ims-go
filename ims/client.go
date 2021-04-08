@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 // ClientConfig is the configuration for a Client.
@@ -37,9 +36,7 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 	client := cfg.Client
 
 	if client == nil {
-		client = &http.Client{
-			Timeout: 30 * time.Second,
-		}
+		client = http.DefaultClient
 	}
 
 	endpointURL, err := url.Parse(cfg.URL)
