@@ -67,7 +67,6 @@ func TestValidateToken(t *testing.T) {
 	}
 }
 
-// Revisar esto pq no me acuerdo
 func TestValidateTokenEmptyErrorResponse(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -81,7 +80,9 @@ func TestValidateTokenEmptyErrorResponse(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	res, err := c.GetProfile(&ims.GetProfileRequest{})
+	res, err := c.ValidateToken(&ims.ValidateTokenRequest{
+		Type: ims.AccessToken,
+	})
 	if res != nil {
 		t.Fatalf("non-nil response returned")
 	}
