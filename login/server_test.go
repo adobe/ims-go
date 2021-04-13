@@ -84,7 +84,7 @@ func TestServerLogin(t *testing.T) {
 	go func() {
 		res, err := http.Get(fmt.Sprintf("http://localhost:%d/", port(lst)))
 		if err != nil {
-			t.Fatalf("perform initial request: %v", err)
+			t.Errorf("perform initial request: %v", err)
 		}
 		defer res.Body.Close()
 	}()
@@ -160,7 +160,7 @@ func TestServerError(t *testing.T) {
 	go func() {
 		res, err := http.Get(fmt.Sprintf("http://localhost:%d/", port(lst)))
 		if err != nil {
-			t.Fatalf("perform initial request: %v", err)
+			t.Errorf("perform initial request: %v", err)
 		}
 		defer res.Body.Close()
 	}()

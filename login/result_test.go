@@ -38,7 +38,7 @@ func TestResult(t *testing.T) {
 		t.Fatalf("expected a response")
 	}
 
-	if s := string(w.Body.Bytes()); s != "Success!" {
+	if s := w.Body.String(); s != "Success!" {
 		t.Fatalf("invalid body: %v", s)
 	}
 }
@@ -63,7 +63,7 @@ func TestResultError(t *testing.T) {
 		t.Fatalf("invalid error: %v", err)
 	}
 
-	if s := string(w.Body.Bytes()); s != "Error: error" {
+	if s := w.Body.String(); s != "Error: error" {
 		t.Fatalf("invalid body: %v", s)
 	}
 }
@@ -87,7 +87,7 @@ func TestResultSuccessHandler(t *testing.T) {
 
 	<-resCh
 
-	if s := string(w.Body.Bytes()); s != "custom" {
+	if s := w.Body.String(); s != "custom" {
 		t.Fatalf("invalid body: %v", s)
 	}
 }
@@ -111,7 +111,7 @@ func TestResultFailureHandler(t *testing.T) {
 
 	<-errCh
 
-	if s := string(w.Body.Bytes()); s != "custom" {
+	if s := w.Body.String(); s != "custom" {
 		t.Fatalf("invalid body: %v", s)
 	}
 }
