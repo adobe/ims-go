@@ -12,10 +12,11 @@ package ims_test
 
 import (
 	"fmt"
-	"github.com/adobe/ims-go/ims"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/adobe/ims-go/ims"
 )
 
 func TestGetOrganizations(t *testing.T) {
