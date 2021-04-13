@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,13 +30,15 @@ type GetOrganizationsResponse struct {
 	Body []byte
 }
 
-// GetOrganizations reads the user organizations associated to a given access token. It
-// returns a non-nil response on success or an error on failure.
-func (c *Client) GetOrganizations(r *GetOrganizationsRequest) (*GetOrganizationsResponse, error) {
+// GetOrganizationsWithContext reads the user organizations associated to a
+// given access token. It returns a non-nil response on success or an error on
+// failure.
+func (c *Client) GetOrganizationsWithContext(ctx context.Context, r *GetOrganizationsRequest) (*GetOrganizationsResponse, error) {
 	if r.ApiVersion == "" {
 		r.ApiVersion = "v5"
 	}
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/ims/organizations/%s", c.url, r.ApiVersion), nil)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ims/organizations/%s", c.url, r.ApiVersion), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
@@ -60,4 +63,10 @@ func (c *Client) GetOrganizations(r *GetOrganizationsRequest) (*GetOrganizations
 	return &GetOrganizationsResponse{
 		Body: body,
 	}, nil
+}
+
+// GetOrganizations is equivalent to GetOrganizationsWithContext with a
+// background context.
+func (c *Client) GetOrganizations(r *GetOrganizationsRequest) (*GetOrganizationsResponse, error) {
+	return c.GetOrganizationsWithContext(context.Background(), r)
 }

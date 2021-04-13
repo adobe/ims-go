@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,12 +30,13 @@ type GetProfileResponse struct {
 	Body []byte
 }
 
-// GetProfile reads the user profile associated to a given access token. It
-// returns a non-nil response on success or an error on failure.
-func (c *Client) GetProfile(r *GetProfileRequest) (*GetProfileResponse, error) {
+// GetProfileWithContext reads the user profile associated to a given access
+// token. It returns a non-nil response on success or an error on failure.
+func (c *Client) GetProfileWithContext(ctx context.Context, r *GetProfileRequest) (*GetProfileResponse, error) {
 	if r.ApiVersion == "" {
 		r.ApiVersion = "v1"
 	}
+
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/ims/profile/%s", c.url, r.ApiVersion), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
@@ -60,4 +62,9 @@ func (c *Client) GetProfile(r *GetProfileRequest) (*GetProfileResponse, error) {
 	return &GetProfileResponse{
 		Body: body,
 	}, nil
+}
+
+// GetProfile is equivalent to GetProfileWithContext with a background context.
+func (c *Client) GetProfile(r *GetProfileRequest) (*GetProfileResponse, error) {
+	return c.GetProfileWithContext(context.Background(), r)
 }

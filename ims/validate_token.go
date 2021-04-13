@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -41,23 +42,28 @@ type ValidateTokenResponse struct {
 	Body []byte
 }
 
-// ValidateToken validates a token using the IMS API.
-// It returns a non-nil response on success or an error on failure.
-func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse, error) {
-
-	// The token type is a mandatory parameter and should be validated.
+// ValidateTokenWithContext validates a token using the IMS API. It returns a
+// non-nil response on success or an error on failure.
+func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenRequest) (*ValidateTokenResponse, error) {
 	switch r.Type {
 	case AccessToken, RefreshToken, DeviceToken, AuthorizationCode:
+		// Valid token type.
 	default:
 		return nil, fmt.Errorf("invalid token type: %v", r.Type)
 	}
 
-	req, err := http.NewRequest(http.MethodGet,
-		fmt.Sprintf("%s/ims/validate_token/v1?type=%s&client_id=%s&token=%s",
-			c.url, r.Type, r.ClientID, r.Token), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ims/validate_token/v1", c.url), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
+
+	query := req.URL.Query()
+
+	query.Set("type", string(r.Type))
+	query.Set("client_id", r.ClientID)
+	query.Set("token", r.Token)
+
+	req.URL.RawQuery = query.Encode()
 
 	// Header X-IMS-ClientID will be mandatory in the future
 	req.Header.Set("X-IMS-ClientId", r.ClientID)
@@ -89,4 +95,10 @@ func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse,
 		Valid: payload.Valid,
 		Body:  body,
 	}, nil
+}
+
+// ValidateToken is equivalent to ValidateTokenWithContext with a background
+// context.
+func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse, error) {
+	return c.ValidateTokenWithContext(context.Background(), r)
 }

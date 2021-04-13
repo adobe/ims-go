@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -46,8 +47,8 @@ type RefreshTokenResponse struct {
 	ExpiresIn time.Duration
 }
 
-// RefreshToken refreshes an access token.
-func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+// RefreshTokenWithContext refreshes an access token.
+func (c *Client) RefreshTokenWithContext(ctx context.Context, r *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	if r.RefreshToken == "" {
 		return nil, fmt.Errorf("missing refresh token")
 	}
@@ -71,7 +72,14 @@ func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, er
 		data.Set("scope", strings.Join(r.Scope, ","))
 	}
 
-	res, err := c.client.PostForm(fmt.Sprintf("%s/ims/token/v2", c.url), data)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/token/v2", c.url), strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
@@ -102,4 +110,10 @@ func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, er
 		RefreshToken: payload.RefreshToken,
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),
 	}, nil
+}
+
+// RefreshToken is equivalent to RefreshTokenWithContext with a background
+// context.
+func (c *Client) RefreshToken(r *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	return c.RefreshTokenWithContext(context.Background(), r)
 }

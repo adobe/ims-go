@@ -11,11 +11,13 @@
 package ims
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -77,8 +79,8 @@ type ExchangeJWTResponse struct {
 	ExpiresIn time.Duration
 }
 
-// ExchangeJWT exchanges a JWT token for an access token.
-func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error) {
+// ExchangeJWTWithContext exchanges a JWT token for an access token.
+func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTRequest) (*ExchangeJWTResponse, error) {
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(r.PrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("parse key: %v", err)
@@ -121,7 +123,14 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 	data.Set("client_secret", r.ClientSecret)
 	data.Set("jwt_token", signed)
 
-	res, err := c.client.PostForm(fmt.Sprintf("%s/ims/exchange/v1/jwt", c.url), data)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/exchange/v1/jwt", c.url), strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
@@ -150,4 +159,9 @@ func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error
 		AccessToken: body.AccessToken,
 		ExpiresIn:   time.Millisecond * time.Duration(body.ExpiresIn),
 	}, nil
+}
+
+// ExchangeJWT is quivalent to ExchangeJWTWithContext with a background context.
+func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error) {
+	return c.ExchangeJWTWithContext(context.Background(), r)
 }

@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -49,8 +50,8 @@ type TokenResponse struct {
 	UserID string
 }
 
-// Token requests an access token.
-func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
+// TokenWithContext requests an access token.
+func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenResponse, error) {
 	if r.Code == "" {
 		return nil, fmt.Errorf("missing code")
 	}
@@ -74,7 +75,14 @@ func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 		data.Set("scope", strings.Join(r.Scope, ","))
 	}
 
-	res, err := c.client.PostForm(fmt.Sprintf("%s/ims/token/v2", c.url), data)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/token/v2", c.url), strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
@@ -107,4 +115,9 @@ func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),
 		UserID:       payload.UserID,
 	}, nil
+}
+
+// Token is equivalent to TokenWithContext with a badkground context.
+func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
+	return c.TokenWithContext(context.Background(), r)
 }
