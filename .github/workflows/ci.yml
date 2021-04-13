@@ -1,19 +1,37 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - master
+      - main
+  pull_request:
 jobs:
-
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
-
-    - name: Install Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-
-    - name: Check out code
-      uses: actions/checkout@v1
-
-    - name: Run tests
-      run: go test ./... -v
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.13
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: go test ./... -v
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.13
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          skip-go-installation: true
