@@ -25,11 +25,10 @@ func TestValidateToken(t *testing.T) {
 			t.Fatalf("invalid method: %v", r.Method)
 		}
 
-		// X-IMS-ClientId header is mandatory
-		// This is the preferred implementation but it is not working at the moment
-		/*if h := r.Header.Get("X-IMS-ClientId"); h != "test_client_id" {
+		// Test X-IMS-ClientId header
+		if h := r.Header.Get("X-IMS-ClientId"); h != "test_client_id" {
 			t.Fatalf("invalid X-IMS-ClientId header: %v", h)
-		}*/
+		}
 
 		clientIdParam, ok := r.URL.Query()["client_id"]
 		if !ok || clientIdParam[0] == "" {

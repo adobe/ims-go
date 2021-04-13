@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -35,6 +36,7 @@ type ValidateTokenRequest struct {
 
 // ValidateTokenResponse is the response to the ValidateToken request .
 type ValidateTokenResponse struct {
+	Valid bool
 	// Body is the raw response body.
 	Body []byte
 }
@@ -57,9 +59,8 @@ func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse,
 		return nil, fmt.Errorf("create request: %v", err)
 	}
 
-	// Setting this header is recommended in the documentation
-	// but it is not working, using client_id in the URL in the meantime
-	//req.Header.Set("X-IMS-ClientId", r.ClientID)
+	// Header X-IMS-ClientID will be mandatory in the future
+	req.Header.Set("X-IMS-ClientId", r.ClientID)
 
 	res, err := c.client.Do(req)
 	if err != nil {
@@ -76,7 +77,16 @@ func (c *Client) ValidateToken(r *ValidateTokenRequest) (*ValidateTokenResponse,
 		return nil, fmt.Errorf("read response: %v", err)
 	}
 
+	var payload struct {
+		Valid bool `json:"valid"`
+	}
+
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, fmt.Errorf("error parsing response: %v", err)
+	}
+
 	return &ValidateTokenResponse{
-		Body: body,
+		Valid: payload.Valid,
+		Body:  body,
 	}, nil
 }
