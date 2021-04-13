@@ -77,7 +77,11 @@ func TestServerLogin(t *testing.T) {
 		t.Fatalf("create server: %v", err)
 	}
 
-	go server.Serve(lst)
+	go func() {
+		if err := server.Serve(lst); err != http.ErrServerClosed {
+			t.Errorf("serve: %v", err)
+		}
+	}()
 
 	// User flow
 
@@ -153,7 +157,11 @@ func TestServerError(t *testing.T) {
 		t.Fatalf("create server: %v", err)
 	}
 
-	go server.Serve(lst)
+	go func() {
+		if err := server.Serve(lst); err != http.ErrServerClosed {
+			t.Errorf("serve: %v", err)
+		}
+	}()
 
 	// User flow
 
