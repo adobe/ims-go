@@ -109,7 +109,7 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 	}, nil
 }
 
-// Token is equivalent to TokenWithContext with a badkground context.
+// Token is equivalent to TokenWithContext with a background context.
 func (c *Client) Token(r *TokenRequest) (*TokenResponse, error) {
 	return c.TokenWithContext(context.Background(), r)
 }

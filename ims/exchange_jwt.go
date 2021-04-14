@@ -153,7 +153,7 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 	}, nil
 }
 
-// ExchangeJWT is quivalent to ExchangeJWTWithContext with a background context.
+// ExchangeJWT is equivalent to ExchangeJWTWithContext with a background context.
 func (c *Client) ExchangeJWT(r *ExchangeJWTRequest) (*ExchangeJWTResponse, error) {
 	return c.ExchangeJWTWithContext(context.Background(), r)
 }
