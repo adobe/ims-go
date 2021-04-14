@@ -14,7 +14,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -37,9 +36,8 @@ type ValidateTokenRequest struct {
 
 // ValidateTokenResponse is the response to the ValidateToken request .
 type ValidateTokenResponse struct {
+	Response
 	Valid bool
-	// Body is the raw response body.
-	Body []byte
 }
 
 // ValidateTokenWithContext validates a token using the IMS API. It returns a
@@ -68,32 +66,26 @@ func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenR
 	// Header X-IMS-ClientID will be mandatory in the future
 	req.Header.Set("X-IMS-ClientId", r.ClientID)
 
-	res, err := c.client.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %v", err)
 	}
 
 	var payload struct {
 		Valid bool `json:"valid"`
 	}
 
-	if err := json.Unmarshal(body, &payload); err != nil {
+	if err := json.Unmarshal(res.Body, &payload); err != nil {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 
 	return &ValidateTokenResponse{
-		Valid: payload.Valid,
-		Body:  body,
+		Response: *res,
+		Valid:    payload.Valid,
 	}, nil
 }
 

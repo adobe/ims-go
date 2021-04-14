@@ -12,6 +12,7 @@ package ims
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -59,5 +60,32 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 	return &Client{
 		url:    endpointURL.String(),
 		client: client,
+	}, nil
+}
+
+// Response contains information about the HTTP response and is embedded in
+// every other response struct.
+type Response struct {
+	// The status code of the HTTP response.
+	StatusCode int
+	// The raw body of the HTTP response.
+	Body []byte
+}
+
+func (c *Client) do(req *http.Request) (*Response, error) {
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %v", err)
+	}
+
+	return &Response{
+		StatusCode: res.StatusCode,
+		Body:       data,
 	}, nil
 }

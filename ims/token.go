@@ -14,7 +14,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -38,8 +37,7 @@ type TokenRequest struct {
 
 // TokenResponse is the response returned after an access token request.
 type TokenResponse struct {
-	// Body is the raw response body.
-	Body []byte
+	Response
 	// AccessToken is the access token.
 	AccessToken string
 	// RefreshToken is the refresh token.
@@ -82,19 +80,13 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	res, err := c.client.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
-	}
-
-	raw, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %v", err)
 	}
 
 	var payload struct {
@@ -104,12 +96,12 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 		UserID       string `json:"userId"`
 	}
 
-	if err := json.Unmarshal(raw, &payload); err != nil {
+	if err := json.Unmarshal(res.Body, &payload); err != nil {
 		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	return &TokenResponse{
-		Body:         raw,
+		Response:     *res,
 		AccessToken:  payload.AccessToken,
 		RefreshToken: payload.RefreshToken,
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),

@@ -13,16 +13,11 @@ package ims
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
 
 // Error is an error containing information returned by the IMS API.
 type Error struct {
-	// Body is the raw body returned by the server.
-	Body []byte
-	// StatusCode is the status code of the response returning the error.
-	StatusCode int
+	Response
 	// ErrorCode is an error code associated with the error response.
 	ErrorCode string
 	// ErrorMessage is a human-readable description of the error.
@@ -45,15 +40,10 @@ func IsError(err error) (*Error, bool) {
 	return imsErr, ok
 }
 
-func errorResponse(r *http.Response) error {
+func errorResponse(res *Response) error {
 	var payload struct {
 		ErrorCode    string `json:"error"`
 		ErrorMessage string `json:"error_description"`
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return fmt.Errorf("read response: %v", err)
 	}
 
 	// The error from json.Unmarshal() is voluntarily ignored. If the server
@@ -62,11 +52,10 @@ func errorResponse(r *http.Response) error {
 	// unparsed body is returned to the user anyway, who will take the final
 	// decision about how to deal with this error.
 
-	_ = json.Unmarshal(body, &payload)
+	_ = json.Unmarshal(res.Body, &payload)
 
 	return &Error{
-		Body:         body,
-		StatusCode:   r.StatusCode,
+		Response:     *res,
 		ErrorCode:    payload.ErrorCode,
 		ErrorMessage: payload.ErrorMessage,
 	}
