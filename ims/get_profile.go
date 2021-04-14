@@ -35,7 +35,7 @@ func (c *Client) GetProfileWithContext(ctx context.Context, r *GetProfileRequest
 		r.ApiVersion = "v1"
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/ims/profile/%s", c.url, r.ApiVersion), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ims/profile/%s", c.url, r.ApiVersion), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
