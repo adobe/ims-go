@@ -13,7 +13,6 @@ package ims
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -26,8 +25,7 @@ type GetOrganizationsRequest struct {
 
 // GetOrganizationsResponse is the response for GetOrganizations.
 type GetOrganizationsResponse struct {
-	// Body is the raw response body.
-	Body []byte
+	Response
 }
 
 // GetOrganizationsWithContext reads the user organizations associated to a
@@ -45,23 +43,17 @@ func (c *Client) GetOrganizationsWithContext(ctx context.Context, r *GetOrganiza
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", r.AccessToken))
 
-	res, err := c.client.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %v", err)
-	}
-
 	return &GetOrganizationsResponse{
-		Body: body,
+		Response: *res,
 	}, nil
 }
 

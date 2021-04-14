@@ -13,7 +13,6 @@ package ims
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -26,8 +25,7 @@ type GetProfileRequest struct {
 
 // GetProfileResponse is the response for GetProfile.
 type GetProfileResponse struct {
-	// Body is the raw response body.
-	Body []byte
+	Response
 }
 
 // GetProfileWithContext reads the user profile associated to a given access
@@ -44,23 +42,17 @@ func (c *Client) GetProfileWithContext(ctx context.Context, r *GetProfileRequest
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", r.AccessToken))
 
-	res, err := c.client.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %v", err)
-	}
-
 	return &GetProfileResponse{
-		Body: body,
+		Response: *res,
 	}, nil
 }
 

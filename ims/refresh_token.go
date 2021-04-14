@@ -14,7 +14,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,8 +36,7 @@ type RefreshTokenRequest struct {
 
 // RefreshTokenResponse is the response of an access token refresh.
 type RefreshTokenResponse struct {
-	// Body is the raw response body.
-	Body []byte
+	Response
 	// AccessToken is the new access token.
 	AccessToken string
 	// RefreshToken is a new refresh token.
@@ -79,19 +77,13 @@ func (c *Client) RefreshTokenWithContext(ctx context.Context, r *RefreshTokenReq
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	res, err := c.client.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, fmt.Errorf("perform request: %v", err)
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, errorResponse(res)
-	}
-
-	raw, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %v", err)
 	}
 
 	var payload struct {
@@ -100,12 +92,12 @@ func (c *Client) RefreshTokenWithContext(ctx context.Context, r *RefreshTokenReq
 		ExpiresIn    int    `json:"expires_in"`
 	}
 
-	if err := json.Unmarshal(raw, &payload); err != nil {
+	if err := json.Unmarshal(res.Body, &payload); err != nil {
 		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	return &RefreshTokenResponse{
-		Body:         raw,
+		Response:     *res,
 		AccessToken:  payload.AccessToken,
 		RefreshToken: payload.RefreshToken,
 		ExpiresIn:    time.Second * time.Duration(payload.ExpiresIn),
