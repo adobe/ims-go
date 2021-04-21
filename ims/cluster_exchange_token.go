@@ -26,7 +26,7 @@ import (
 type ClusterExchangeRequest struct {
 	ClientID     string
 	ClientSecret string
-	Scope        []string
+	Scopes       []string
 	UserToken    string
 	UserID       string
 	OrgID        string
@@ -55,10 +55,9 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 	default:
 		return nil, fmt.Errorf("no userID or OrgID parameters to perform the request")
 	}
+	data.Set("scope", strings.Join(r.Scopes, ","))
 
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
+	req, err := http.NewRequestWithContext( ctx, http.MethodPost,
 		fmt.Sprintf("%s/ims/token/v3?client_id=%s", c.url, r.ClientID),
 		strings.NewReader(data.Encode()))
 	if err != nil {

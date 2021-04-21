@@ -42,14 +42,14 @@ func TestClusterExchange(t *testing.T) {
 		if v := r.PostForm.Get("user_token"); v == "" {
 			t.Fatalf("missing user token")
 		}
-		if v := r.PostForm.Get("client_id"); v != "client-id" {
-			t.Fatalf("invalid client ID: %v", v)
-		}
 		if v := r.PostForm.Get("client_secret"); v != "client-secret" {
 			t.Fatalf("invalid client secret: %v", v)
 		}
 		if v := r.PostForm.Get("owning_org_id"); v != "orgid" {
 			t.Fatalf("invalid IMS Org ID: %v", v)
+		}
+		if v := r.PostForm.Get("scope"); v != "yolo,test" {
+			t.Fatalf("invalid scopes: %v", v)
 		}
 
 		body := struct {
@@ -78,7 +78,7 @@ func TestClusterExchange(t *testing.T) {
 	r, err := c.ClusterExchange(&ims.ClusterExchangeRequest{
 		ClientID:     "client-id",
 		ClientSecret: "client-secret",
-		Scope:        []string{"yolo", "test"},
+		Scopes:       []string{"yolo", "test"},
 		UserToken:    "old-token",
 		OrgID:        "orgid",
 	})
@@ -121,7 +121,7 @@ func TestClusterExchangeError(t *testing.T) {
 	_, err = c.ClusterExchange(&ims.ClusterExchangeRequest{
 		ClientID:     "irrelevant",
 		ClientSecret: "irrelevant",
-		Scope:        []string{"yolo", "test"},
+		Scopes:       []string{"yolo", "test"},
 		UserToken:    "old-token",
 		OrgID:        "orgid",
 	})
@@ -152,7 +152,7 @@ func TestClusterExchangeInvalidRequest(t *testing.T) {
 	_, err = c.ClusterExchange(&ims.ClusterExchangeRequest{
 		ClientID:     "client-id",
 		ClientSecret: "client-secret",
-		Scope:        []string{"yolo", "test"},
+		Scopes:       []string{"yolo", "test"},
 		UserToken:    "old-token",
 		OrgID:        "orgid",
 		UserID:       "userid",
