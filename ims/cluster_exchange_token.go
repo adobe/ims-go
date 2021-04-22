@@ -57,7 +57,7 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 	}
 	data.Set("scope", strings.Join(r.Scopes, ","))
 
-	req, err := http.NewRequestWithContext( ctx, http.MethodPost,
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		fmt.Sprintf("%s/ims/token/v3?client_id=%s", c.url, r.ClientID),
 		strings.NewReader(data.Encode()))
 	if err != nil {
