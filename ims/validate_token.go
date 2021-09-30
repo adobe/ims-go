@@ -17,15 +17,6 @@ import (
 	"net/http"
 )
 
-type TokenType string
-
-const (
-	AccessToken       TokenType = "access_token"
-	RefreshToken      TokenType = "refresh_token"
-	DeviceToken       TokenType = "device_token"
-	AuthorizationCode TokenType = "authorization_code"
-)
-
 // ValidateTokenRequest is the request to ValidateToken.
 type ValidateTokenRequest struct {
 	// AccessToken is a valid access token.
