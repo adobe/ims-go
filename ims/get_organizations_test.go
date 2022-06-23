@@ -39,7 +39,7 @@ func TestGetOrganizations(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	res, err := c.GetProfile(&ims.GetProfileRequest{
+	res, err := c.GetOrganizations(&ims.GetOrganizationsRequest{
 		AccessToken: "accessToken",
 	})
 	if err != nil {
