@@ -19,7 +19,7 @@ import (
 	"github.com/adobe/ims-go/ims"
 )
 
-func TestGetOrganizations(t *testing.T) {
+func TestGetUserInfo(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Fatalf("invalid method: %v", r.Method)
@@ -39,11 +39,11 @@ func TestGetOrganizations(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	res, err := c.GetOrganizations(&ims.GetOrganizationsRequest{
+	res, err := c.GetUserInfo(&ims.GetUserInfoRequest{
 		AccessToken: "accessToken",
 	})
 	if err != nil {
-		t.Fatalf("get organizations: %v", err)
+		t.Fatalf("get user info: %v", err)
 	}
 
 	if body := string(res.Body); body != `{"foo":"bar"}` {
@@ -51,7 +51,7 @@ func TestGetOrganizations(t *testing.T) {
 	}
 }
 
-func TestGetOrganizationsEmptyErrorResponse(t *testing.T) {
+func TestGetUserInfoEmptyErrorResponse(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
@@ -64,7 +64,7 @@ func TestGetOrganizationsEmptyErrorResponse(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	res, err := c.GetOrganizations(&ims.GetOrganizationsRequest{})
+	res, err := c.GetUserInfo(&ims.GetUserInfoRequest{})
 	if res != nil {
 		t.Fatalf("non-nil response returned")
 	}
