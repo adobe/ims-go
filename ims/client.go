@@ -21,9 +21,9 @@ import (
 type ClientConfig struct {
 	// URL is the endpoint for the IMS API.
 	URL string
-	// Client is the HTTP client to use when performing requests. If not
+	// Client is an HTTP client to use when performing requests. If not
 	// provided, the default HTTP client is used.
-	Client *http.Client
+	Client HTTPClient
 }
 
 // Client is the client for the IMS API.
