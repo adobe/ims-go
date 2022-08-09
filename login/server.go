@@ -26,24 +26,24 @@ import (
 // The usage pattern for the login server (minus error handling, for simplicity)
 // is the following.
 //
-//  // Start the service
-//  srv := login.NewServer(cfg)
+//	// Start the service
+//	srv := login.NewServer(cfg)
 //
-//  // Listen on a separate goroutine
-//  go srv.Serve(listener)
+//	// Listen on a separate goroutine
+//	go srv.Serve(listener)
 //
-//  // Wait for a response.
-//  select {
-//  case res := <-srv.Response():
-//      // Process the login response.
-//  case err := <-srv.Error():
-//      // An error occurred.
-//  case <- time.After(5 * time.Minute):
-//      // Bail out after some time.
-//  }
+//	// Wait for a response.
+//	select {
+//	case res := <-srv.Response():
+//	    // Process the login response.
+//	case err := <-srv.Error():
+//	    // An error occurred.
+//	case <- time.After(5 * time.Minute):
+//	    // Bail out after some time.
+//	}
 //
-//  // Close the server.
-//  srv.Shutdown()
+//	// Close the server.
+//	srv.Shutdown()
 type Server struct {
 	server *http.Server
 	resCh  chan *ims.TokenResponse
