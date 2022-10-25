@@ -12,7 +12,7 @@ package ims
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -21,15 +21,20 @@ import (
 type ClientConfig struct {
 	// URL is the endpoint for the IMS API.
 	URL string
-	// Client is the HTTP client to use when performing requests. If not
+	// Client is an HTTP client to use when performing requests. If not
 	// provided, the default HTTP client is used.
-	Client *http.Client
+	Client HTTPClient
 }
 
 // Client is the client for the IMS API.
 type Client struct {
 	url    string
-	client *http.Client
+	client HTTPClient
+}
+
+// HTTPClient allows to use other extended http clients instead of the one provided by the http package
+type HTTPClient interface {
+	Do(r *http.Request) (*http.Response, error)
 }
 
 // NewClient creates a new Client for the given configuration.
@@ -79,7 +84,7 @@ func (c *Client) do(req *http.Request) (*Response, error) {
 	}
 	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response body: %v", err)
 	}
