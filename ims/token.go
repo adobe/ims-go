@@ -26,7 +26,7 @@ type TokenRequest struct {
 	// If not set, authorization_code will be used
 	GrantType string
 	// Code is the authorization code obtained via the authorization workflow.
-	// This field is required (except for GrantType=authorization_code).
+	// This field is required (except for GrantType=client_credentials).
 	Code string
 	// ClientID is the client ID. This field is required.
 	ClientID string
