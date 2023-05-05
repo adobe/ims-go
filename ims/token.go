@@ -53,7 +53,7 @@ type TokenResponse struct {
 
 // TokenWithContext requests an access token.
 func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenResponse, error) {
-	if (r.Code == "") && (r.GrantType != "client_credentials") {
+	if r.Code == "" && r.GrantType != "client_credentials" {
 		return nil, fmt.Errorf("missing code")
 	}
 
