@@ -22,8 +22,11 @@ import (
 
 // TokenRequest is the request for obtaining an access token.
 type TokenRequest struct {
+	// GrantType is the type of credentials to request.
+	// If not set, authorization_code will be used
+	GrantType string
 	// Code is the authorization code obtained via the authorization workflow.
-	// This field is required.
+	// This field is required (except for GrantType=client_credentials).
 	Code string
 	// ClientID is the client ID. This field is required.
 	ClientID string
@@ -50,7 +53,7 @@ type TokenResponse struct {
 
 // TokenWithContext requests an access token.
 func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenResponse, error) {
-	if r.Code == "" {
+	if r.Code == "" && r.GrantType != "client_credentials" {
 		return nil, fmt.Errorf("missing code")
 	}
 
@@ -64,8 +67,14 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 
 	data := url.Values{}
 
-	data.Set("grant_type", "authorization_code")
-	data.Set("code", r.Code)
+	if r.GrantType != "" {
+		data.Set("grant_type", r.GrantType)
+	} else {
+		data.Set("grant_type", "authorization_code")
+	}
+	if r.Code != "" {
+		data.Set("code", r.Code)
+	}
 	data.Set("client_id", r.ClientID)
 	data.Set("client_secret", r.ClientSecret)
 
