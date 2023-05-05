@@ -95,6 +95,79 @@ func TestToken(t *testing.T) {
 	}
 }
 
+func TestTokenClientCredentials(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("invalid method: %v", r.Method)
+		}
+		if r.URL.Path != "/ims/token/v2" {
+			t.Fatalf("invalid path: %v", r.URL.Path)
+		}
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if v := r.PostForm.Get("grant_type"); v != "client_credentials" {
+			t.Fatalf("invalid grant type: %v", v)
+		}
+		if v := r.PostForm.Get("code"); v != "" {
+			t.Fatalf("invalid code: %v", v)
+		}
+		if v := r.PostForm.Get("client_id"); v != "clientID" {
+			t.Fatalf("invalid client ID: %v", v)
+		}
+		if v := r.PostForm.Get("client_secret"); v != "clientSecret" {
+			t.Fatalf("invalid client secret: %v", v)
+		}
+		if v := r.PostForm.Get("scope"); v != "a,b" {
+			t.Fatalf("invalid scope: %v", v)
+		}
+
+		body := struct {
+			ExpiresIn   int    `json:"expires_in"`
+			AccessToken string `json:"access_token"`
+			TokenType   string `json:"token_type"`
+		}{
+			ExpiresIn:   3600,
+			AccessToken: "accessToken",
+			TokenType:   "bearer",
+		}
+
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: s.URL,
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.Token(&ims.TokenRequest{
+		GrantType:    "client_credentials",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		Scope:        []string{"a", "b"},
+	})
+	if err != nil {
+		t.Fatalf("token: %v", err)
+	}
+	if r.AccessToken != "accessToken" {
+		t.Errorf("invalid access token: %v", r.AccessToken)
+	}
+	if r.RefreshToken != "" {
+		t.Errorf("invalid refresh token: %v", r.RefreshToken)
+	}
+	if r.ExpiresIn != 3600*time.Second {
+		t.Errorf("invalid expiration: %v", r.ExpiresIn)
+	}
+	if r.UserID != "" {
+		t.Errorf("invalid userId: %v", r.UserID)
+	}
+}
+
 func TestTokenError(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
