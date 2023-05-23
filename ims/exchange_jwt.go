@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // MetaScope is a meta-scope that can be optionally added to a JWT token.
