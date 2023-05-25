@@ -58,8 +58,10 @@ type ServerConfig struct {
 	ClientID string
 	// The client secret.
 	ClientSecret string
-	// The scope.
+	// List of scopes to request.
 	Scope []string
+	// The URL to be redirected after authentication
+	RedirectURI string
 	// A custom handler for sending an error response to the client. If not
 	// provided, a default response is sent.
 	OnError http.Handler
@@ -89,11 +91,12 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	route := &routeMiddleware{
 		redirect: &redirectMiddleware{
-			client:   cfg.Client,
-			clientID: cfg.ClientID,
-			scope:    cfg.Scope,
-			state:    state,
-			next:     result,
+			client:      cfg.Client,
+			clientID:    cfg.ClientID,
+			scope:       cfg.Scope,
+			state:       state,
+			redirectURI: cfg.RedirectURI,
+			next:        result,
 		},
 
 		callback: &callbackMiddleware{
