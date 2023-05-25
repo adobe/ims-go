@@ -39,8 +39,7 @@ type AuthorizeURLConfig struct {
 	State       string
 }
 
-// AuthorizeURL builds an authorization URL according to the provided
-// configuration.
+// AuthorizeURL builds an authorization URL according to the provided configuration.
 func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 	if cfg.ClientID == "" {
 		return "", fmt.Errorf("missing client ID")
