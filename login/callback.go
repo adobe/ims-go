@@ -28,6 +28,7 @@ type callbackMiddleware struct {
 	clientSecret string
 	scope        []string
 	next         http.Handler
+	codeVerifier string
 }
 
 func (h *callbackMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +62,7 @@ func (h *callbackMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ClientID:     h.clientID,
 		ClientSecret: h.clientSecret,
 		Scope:        h.scope,
+		CodeVerifier: h.codeVerifier,
 	})
 	if err != nil {
 		serveError(h.next, w, r, fmt.Errorf("obtaining access token: %v", err))

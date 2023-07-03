@@ -68,6 +68,8 @@ type ServerConfig struct {
 	// A custom handler for sending a success response to the client. If not
 	// provided, a default response is sent.
 	OnSuccess http.Handler
+	// Use PKCE in the authorization code flow.
+	UsePKCE bool
 }
 
 // NewServer creates a new Server for the provided ServerConfig.
@@ -75,6 +77,14 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	state, err := randomState()
 	if err != nil {
 		return nil, fmt.Errorf("generate random state: %v", err)
+	}
+
+	codeVerifier := ""
+	if cfg.UsePKCE {
+		codeVerifier, err = randomCodeVerifier()
+		if err != nil {
+			return nil, fmt.Errorf("generate random code verifier: %v", err)
+		}
 	}
 
 	var (
@@ -91,12 +101,13 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	route := &routeMiddleware{
 		redirect: &redirectMiddleware{
-			client:      cfg.Client,
-			clientID:    cfg.ClientID,
-			scope:       cfg.Scope,
-			state:       state,
-			redirectURI: cfg.RedirectURI,
-			next:        result,
+			client:       cfg.Client,
+			clientID:     cfg.ClientID,
+			scope:        cfg.Scope,
+			state:        state,
+			redirectURI:  cfg.RedirectURI,
+			next:         result,
+			codeVerifier: codeVerifier,
 		},
 
 		callback: &callbackMiddleware{
@@ -106,6 +117,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 			scope:        cfg.Scope,
 			state:        state,
 			next:         result,
+			codeVerifier: codeVerifier,
 		},
 	}
 
@@ -149,8 +161,20 @@ func randomState() (string, error) {
 	binaryData := make([]byte, 128)
 
 	if _, err := rand.Read(binaryData); err != nil {
-		return "", err
+		return "", fmt.Errorf("error generating state parameter: %v", err)
 	}
 
 	return base64.StdEncoding.EncodeToString(binaryData), nil
+}
+
+// Returns a random code verifier parameter for PKCE
+// https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
+func randomCodeVerifier() (string, error) {
+	binaryData := make([]byte, 32)
+
+	if _, err := rand.Read(binaryData); err != nil {
+		return "", fmt.Errorf("error generating code verifier parameter: %v", err)
+	}
+
+	return base64.URLEncoding.EncodeToString(binaryData), nil
 }
