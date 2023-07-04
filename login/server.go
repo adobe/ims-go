@@ -176,5 +176,5 @@ func randomCodeVerifier() (string, error) {
 		return "", fmt.Errorf("error generating code verifier parameter: %v", err)
 	}
 
-	return base64.URLEncoding.EncodeToString(binaryData), nil
+	return base64.RawURLEncoding.EncodeToString(binaryData), nil
 }

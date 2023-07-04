@@ -14,6 +14,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 )
@@ -69,6 +70,9 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 		q.Set("response_type", "token")
 	case GrantTypeDevice:
 		q.Set("response_type", "device")
+	default:
+		// Default to Authz Code Grant for backward compatibility reasons
+		q.Set("response_type", "code")
 	}
 
 	if cfg.RedirectURI != "" {
@@ -83,12 +87,14 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 	if cfg.CodeVerifier != "" {
 		h := sha256.New()
 		h.Write([]byte(cfg.CodeVerifier))
-		codeChallenge := base64.URLEncoding.EncodeToString(h.Sum(nil))
+		codeChallenge := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 		q.Set("code_challenge", codeChallenge)
 		q.Set("code_challenge_method", "S256")
 	}
 
 	apiURL.RawQuery = q.Encode()
+
+	log.Println("AuthorizeURL: ", apiURL.String())
 
 	return apiURL.String(), nil
 }

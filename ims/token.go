@@ -63,8 +63,8 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 		return nil, fmt.Errorf("missing client ID")
 	}
 
-	if r.ClientSecret == "" {
-		return nil, fmt.Errorf("missing client secret")
+	if r.ClientSecret == "" && r.CodeVerifier == "" {
+		return nil, fmt.Errorf("missing either client secret or code verifier")
 	}
 
 	data := url.Values{}
@@ -78,7 +78,11 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 		data.Set("code", r.Code)
 	}
 	data.Set("client_id", r.ClientID)
-	data.Set("client_secret", r.ClientSecret)
+
+	// client secret is optional, IMS supports public clients
+	if r.ClientSecret != "" {
+		data.Set("client_secret", r.ClientSecret)
+	}
 
 	if r.CodeVerifier != "" {
 		data.Set("code_verifier", r.CodeVerifier)

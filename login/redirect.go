@@ -34,6 +34,7 @@ type redirectMiddleware struct {
 func (h *redirectMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url, err := h.client.AuthorizeURL(&ims.AuthorizeURLConfig{
 		ClientID:     h.clientID,
+		GrantType:    ims.GrantTypeCode,
 		Scope:        h.scope,
 		State:        h.state,
 		RedirectURI:  h.redirectURI,

@@ -253,7 +253,7 @@ func TestTokenNoClientID(t *testing.T) {
 	}
 }
 
-func TestTokenNoClientSecret(t *testing.T) {
+func TestTokenNoClientSecretPrivateClient(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{
 		URL: "http://ims.endpoint",
 	})
@@ -266,7 +266,7 @@ func TestTokenNoClientSecret(t *testing.T) {
 		ClientID: "clientID",
 	}); err == nil {
 		t.Fatalf("no error returned")
-	} else if err.Error() != "missing client secret" {
+	} else if err.Error() != "missing either client secret or code verifier" {
 		t.Fatalf("invalid error: %v", err)
 	}
 }
