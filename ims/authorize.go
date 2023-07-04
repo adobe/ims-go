@@ -14,7 +14,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 )
@@ -93,8 +92,6 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 	}
 
 	apiURL.RawQuery = q.Encode()
-
-	log.Println("AuthorizeURL: ", apiURL.String())
 
 	return apiURL.String(), nil
 }
