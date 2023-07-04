@@ -11,6 +11,8 @@
 package ims
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"strings"
@@ -32,11 +34,12 @@ const (
 
 // AuthorizeURLConfig is the configuration for building an authorization URL.
 type AuthorizeURLConfig struct {
-	ClientID    string
-	GrantType   GrantType
-	Scope       []string
-	RedirectURI string
-	State       string
+	ClientID     string
+	GrantType    GrantType
+	Scope        []string
+	RedirectURI  string
+	State        string
+	CodeVerifier string
 }
 
 // AuthorizeURL builds an authorization URL according to the provided configuration.
@@ -66,6 +69,9 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 		q.Set("response_type", "token")
 	case GrantTypeDevice:
 		q.Set("response_type", "device")
+	default:
+		// Default to Authz Code Grant for backward compatibility reasons
+		q.Set("response_type", "code")
 	}
 
 	if cfg.RedirectURI != "" {
@@ -74,6 +80,15 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 
 	if cfg.State != "" {
 		q.Set("state", cfg.State)
+	}
+
+	// SHA256 the code verifier and base64 encode it.
+	if cfg.CodeVerifier != "" {
+		h := sha256.New()
+		h.Write([]byte(cfg.CodeVerifier))
+		codeChallenge := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+		q.Set("code_challenge", codeChallenge)
+		q.Set("code_challenge_method", "S256")
 	}
 
 	apiURL.RawQuery = q.Encode()

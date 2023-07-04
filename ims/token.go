@@ -36,6 +36,8 @@ type TokenRequest struct {
 	// If not provided, the scopes will be bound to the ones requested during
 	// the authorization workflow.
 	Scope []string
+	// CodeVerifier to be sent if PKCE is used
+	CodeVerifier string
 }
 
 // TokenResponse is the response returned after an access token request.
@@ -61,8 +63,8 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 		return nil, fmt.Errorf("missing client ID")
 	}
 
-	if r.ClientSecret == "" {
-		return nil, fmt.Errorf("missing client secret")
+	if r.ClientSecret == "" && r.CodeVerifier == "" {
+		return nil, fmt.Errorf("missing either client secret or code verifier")
 	}
 
 	data := url.Values{}
@@ -76,7 +78,15 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 		data.Set("code", r.Code)
 	}
 	data.Set("client_id", r.ClientID)
-	data.Set("client_secret", r.ClientSecret)
+
+	// client secret is optional, IMS supports public clients
+	if r.ClientSecret != "" {
+		data.Set("client_secret", r.ClientSecret)
+	}
+
+	if r.CodeVerifier != "" {
+		data.Set("code_verifier", r.CodeVerifier)
+	}
 
 	if len(r.Scope) > 0 {
 		data.Set("scope", strings.Join(r.Scope, ","))

@@ -22,20 +22,23 @@ type redirectBackend interface {
 }
 
 type redirectMiddleware struct {
-	client      redirectBackend
-	clientID    string
-	scope       []string
-	state       string
-	redirectURI string
-	next        http.Handler
+	client       redirectBackend
+	clientID     string
+	scope        []string
+	state        string
+	redirectURI  string
+	next         http.Handler
+	codeVerifier string
 }
 
 func (h *redirectMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url, err := h.client.AuthorizeURL(&ims.AuthorizeURLConfig{
-		ClientID:    h.clientID,
-		Scope:       h.scope,
-		State:       h.state,
-		RedirectURI: h.redirectURI,
+		ClientID:     h.clientID,
+		GrantType:    ims.GrantTypeCode,
+		Scope:        h.scope,
+		State:        h.state,
+		RedirectURI:  h.redirectURI,
+		CodeVerifier: h.codeVerifier,
 	})
 	if err != nil {
 		serveError(h.next, w, r, fmt.Errorf("generate authorization URL: %v", err))
