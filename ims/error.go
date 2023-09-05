@@ -12,6 +12,7 @@ package ims
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -37,7 +38,8 @@ func (e *Error) Error() string {
 // IsError checks if the given error is an IMS error and, if it is, returns an
 // instance of Error.
 func IsError(err error) (*Error, bool) {
-	imsErr, ok := err.(*Error)
+	var imsErr *Error
+	ok := errors.As(err, &imsErr)
 	return imsErr, ok
 }
 
