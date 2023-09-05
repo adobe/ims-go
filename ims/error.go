@@ -26,10 +26,11 @@ type Error struct {
 
 func (e *Error) Error() string {
 	return fmt.Sprintf(
-		"error response: statusCode=%d, errorCode='%s', errorMessage='%s'",
+		"error response: statusCode=%d, errorCode='%s', errorMessage='%s', x-debug-id='%s'",
 		e.StatusCode,
 		e.ErrorCode,
 		e.ErrorMessage,
+		e.XDebugID,
 	)
 }
 
