@@ -2,7 +2,7 @@
 
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/adobe/ims-go)](https://github.com/adobe/ims-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/adobe/ims-go/ims.svg)](https://pkg.go.dev/github.com/adobe/ims-go/ims)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/adobe/ims-go/CI)](https://github.com/adobe/ims-go/actions/workflows/ci.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/adobe/ims-go/ci.yml?branch=master)](https://github.com/adobe/ims-go/actions/workflows/ci.yml)
 
 This project is a Go library for accessing the IMS API. 
 The goal of this project is to provide an easy-to-use binding to the IMS API and a set of common utilities for working efficiently with IMS.
