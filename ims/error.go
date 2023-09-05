@@ -12,6 +12,7 @@ package ims
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -26,17 +27,19 @@ type Error struct {
 
 func (e *Error) Error() string {
 	return fmt.Sprintf(
-		"error response: statusCode=%d, errorCode='%s', errorMessage='%s'",
+		"error response: statusCode=%d, errorCode='%s', errorMessage='%s', x-debug-id='%s'",
 		e.StatusCode,
 		e.ErrorCode,
 		e.ErrorMessage,
+		e.XDebugID,
 	)
 }
 
 // IsError checks if the given error is an IMS error and, if it is, returns an
 // instance of Error.
 func IsError(err error) (*Error, bool) {
-	imsErr, ok := err.(*Error)
+	var imsErr *Error
+	ok := errors.As(err, &imsErr)
 	return imsErr, ok
 }
 

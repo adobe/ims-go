@@ -17,6 +17,7 @@ jobs:
           - "1.18"
           - "1.19"
           - "1.20"
+          - "1.21"
     steps:
       - name: Install Go
         uses: actions/setup-go@v4
@@ -28,6 +29,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          skip-go-installation: true
       - name: Run tests
         run: go test ./... -v
