@@ -59,7 +59,7 @@ func TestClusterExchange(t *testing.T) {
 		}{
 			TokenType:   "bearer",
 			AccessToken: "new-token",
-			ExpiresIn:   3600000,
+			ExpiresIn:   3600,
 		}
 
 		if err := json.NewEncoder(w).Encode(&body); err != nil {
