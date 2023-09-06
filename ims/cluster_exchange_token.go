@@ -87,7 +87,7 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 	return &ClusterExchangeResponse{
 		Response:    *res,
 		AccessToken: body.AccessToken,
-		ExpiresIn:   time.Millisecond * time.Duration(body.ExpiresIn),
+		ExpiresIn:   time.Second * time.Duration(body.ExpiresIn),
 	}, nil
 }
 
