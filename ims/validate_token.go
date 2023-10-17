@@ -15,6 +15,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // ValidateTokenRequest is the request to ValidateToken.
@@ -41,21 +43,20 @@ func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenR
 		return nil, fmt.Errorf("invalid token type: %v", r.Type)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ims/validate_token/v1", c.url), nil)
+	data := url.Values{}
+
+	data.Set("type", string(r.Type))
+	data.Set("client_id", r.ClientID)
+	data.Set("token", r.Token)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/validate_token/v1", c.url), strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
 	}
 
-	query := req.URL.Query()
-
-	query.Set("type", string(r.Type))
-	query.Set("client_id", r.ClientID)
-	query.Set("token", r.Token)
-
-	req.URL.RawQuery = query.Encode()
-
 	// Header X-IMS-ClientID will be mandatory in the future
 	req.Header.Set("X-IMS-ClientId", r.ClientID)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
