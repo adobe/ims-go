@@ -21,8 +21,8 @@ import (
 
 func TestValidateToken(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Only GET accepted
-		if r.Method != http.MethodGet {
+		// Only POST accepted
+		if r.Method != http.MethodPost {
 			t.Fatalf("invalid method: %v", r.Method)
 		}
 
@@ -31,17 +31,19 @@ func TestValidateToken(t *testing.T) {
 			t.Fatalf("invalid X-IMS-ClientId header: %v", h)
 		}
 
-		clientIdParam, ok := r.URL.Query()["client_id"]
-		if !ok || clientIdParam[0] == "" {
-			t.Fatalf("missing mandatory client_id URL parameter")
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
 		}
 
-		// Token type URL parameter is mandatory
-		typeParam, ok := r.URL.Query()["type"]
-		if !ok || typeParam[0] == "" {
-			t.Fatalf("missing mandatory type URL parameter")
+		if v := r.PostForm.Get("client_id"); v != "test_client_id" {
+			t.Fatalf("missing client ID: %v", v)
 		}
-		var tokenType = ims.TokenType(typeParam[0])
+
+		if v := r.PostForm.Get("type"); v == "" {
+			t.Fatalf("missing type: %v", v)
+		}
+
+		var tokenType = ims.TokenType(r.PostForm.Get("type"))
 
 		switch tokenType {
 		case ims.AccessToken, ims.RefreshToken, ims.DeviceToken, ims.AuthorizationCode:
