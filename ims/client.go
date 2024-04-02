@@ -76,7 +76,8 @@ type Response struct {
 	// The raw body of the HTTP response.
 	Body []byte
 	// The value of the X-Debug-Id header.
-	XDebugID string
+	XDebugID   string
+	RetryAfter string
 }
 
 func (c *Client) do(req *http.Request) (*Response, error) {
@@ -93,10 +94,12 @@ func (c *Client) do(req *http.Request) (*Response, error) {
 
 	// X-Debug-Id is the header used by IMS to track requests.
 	xdebugid := res.Header.Get("x-debug-id")
+	retryAfter := res.Header.Get("Retry-After")
 
 	return &Response{
 		StatusCode: res.StatusCode,
 		Body:       data,
 		XDebugID:   xdebugid,
+		RetryAfter: retryAfter,
 	}, nil
 }

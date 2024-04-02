@@ -26,6 +26,16 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
+	if e.RetryAfter != "" {
+		return fmt.Sprintf(
+			"error response: statusCode=%d, errorCode='%s', errorMessage='%s', x-debug-id='%s', retry-after='%s'",
+			e.StatusCode,
+			e.ErrorCode,
+			e.ErrorMessage,
+			e.XDebugID,
+			e.RetryAfter,
+		)
+	}
 	return fmt.Sprintf(
 		"error response: statusCode=%d, errorCode='%s', errorMessage='%s', x-debug-id='%s'",
 		e.StatusCode,

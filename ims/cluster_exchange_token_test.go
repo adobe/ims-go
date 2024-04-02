@@ -141,6 +141,66 @@ func TestClusterExchangeError(t *testing.T) {
 	}
 }
 
+func TestClusterExchangeTooManyRequests(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Retry-After", "77")
+		w.Header().Set("x-debug-id", "banana")
+		w.WriteHeader(http.StatusTooManyRequests)
+
+		body := struct {
+			ErrorCode    string `json:"error"`
+			ErrorMessage string `json:"error_description"`
+		}{
+			ErrorCode:    "error-code",
+			ErrorMessage: "error-message",
+		}
+
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: s.URL,
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	res, err := c.ClusterExchange(&ims.ClusterExchangeRequest{
+		ClientID:     "irrelevant",
+		ClientSecret: "irrelevant",
+		Scopes:       []string{"yolo", "test"},
+		UserToken:    "old-token",
+		OrgID:        "orgid",
+	})
+
+	if res != nil {
+		t.Fatalf("expected nil response because of error")
+	}
+
+	imsErr, ok := ims.IsError(err)
+	if !ok {
+		t.Fatalf("expected IMS error")
+	}
+	if imsErr.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("invalid status code: %v", imsErr.StatusCode)
+	}
+	if imsErr.ErrorCode != "error-code" {
+		t.Fatalf("invalid error code: %v", imsErr.ErrorCode)
+	}
+	if imsErr.ErrorMessage != "error-message" {
+		t.Fatalf("invalid error message: %v", imsErr.ErrorMessage)
+	}
+	if imsErr.RetryAfter != "77" {
+		t.Fatalf("invalid retry-after header: %v", imsErr.RetryAfter)
+	}
+	if imsErr.XDebugID != "banana" {
+		t.Fatalf("invalid x-debug-id header: %v", imsErr.RetryAfter)
+	}
+}
+
 func TestClusterExchangeInvalidRequest(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{
 		URL: "http://ims.endpoint",
