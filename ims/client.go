@@ -80,12 +80,22 @@ type Response struct {
 	RetryAfter string
 }
 
-func (c *Client) do(req *http.Request) (*Response, error) {
+func (c *Client) do(req *http.Request) (_ *Response, e error) {
 	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+
+	defer func() {
+		if err := res.Body.Close(); err != nil && e == nil {
+			e = fmt.Errorf("close body: %v", err)
+		}
+	}()
+
+	// If the call to io.ReadAll is removed, make sure to io.Copy the response
+	// body into io.Discard to allow reusing the underlying connection for
+	// Keep-Alive support in HTTP 1.x. See the documentation of the Body field
+	// in http.Response for further details.
 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
