@@ -11,6 +11,7 @@
 package ims
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,8 +88,8 @@ func (c *Client) do(req *http.Request) (_ *Response, e error) {
 	}
 
 	defer func() {
-		if err := res.Body.Close(); err != nil && e == nil {
-			e = fmt.Errorf("close body: %v", err)
+		if err := res.Body.Close(); err != nil {
+			e = errors.Join(e, fmt.Errorf("close body: %v", err))
 		}
 	}()
 
