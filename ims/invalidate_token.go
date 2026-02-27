@@ -57,7 +57,9 @@ func (c *Client) InvalidateTokenWithContext(ctx context.Context, r *InvalidateTo
 		data.Set("cascading", "all")
 	}
 	data.Set("client_id", r.ClientID)
-	data.Set("client_secret", r.ClientSecret)
+	if r.ClientSecret != "" {
+		data.Set("client_secret", r.ClientSecret)
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/invalidate_token/v2", c.url),
 		strings.NewReader(data.Encode()))
