@@ -67,7 +67,7 @@ func TestInvalidateToken(t *testing.T) {
 		default:
 			t.Fatalf("incorrect type of token: %v", tokenType)
 		}
-		fmt.Fprint(w, `{"foo":"bar"}`)
+		_, _ = fmt.Fprint(w, `{"foo":"bar"}`)
 	}))
 	defer s.Close()
 
