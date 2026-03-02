@@ -1,8 +1,11 @@
 # Go IMS Client
 
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/adobe/ims-go)](https://github.com/adobe/ims-go/releases)
+[![CI](https://github.com/adobe/ims-go/actions/workflows/ci.yml/badge.svg)](https://github.com/adobe/ims-go/actions/workflows/ci.yml)
+[![govulncheck](https://github.com/adobe/ims-go/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/adobe/ims-go/actions/workflows/govulncheck.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/adobe/ims-go)](https://goreportcard.com/report/github.com/adobe/ims-go)
+![Go Version](https://img.shields.io/github/go-mod/go-version/adobe/ims-go)
 [![Go Reference](https://pkg.go.dev/badge/github.com/adobe/ims-go/ims.svg)](https://pkg.go.dev/github.com/adobe/ims-go/ims)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/adobe/ims-go/ci.yml?branch=master)](https://github.com/adobe/ims-go/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 This project is a Go library for accessing the IMS API. 
 The goal of this project is to provide an easy-to-use binding to the IMS API and a set of common utilities for working efficiently with IMS.

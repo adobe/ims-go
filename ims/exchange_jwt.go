@@ -83,6 +83,14 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 	if err != nil {
 		return nil, fmt.Errorf("parse key: %v", err)
 	}
+	// Zero the parsed private key after use to reduce the window where
+	// sensitive key material remains in memory.
+	defer func() {
+		key.D.SetInt64(0)
+		for i := range key.Primes {
+			key.Primes[i].SetInt64(0)
+		}
+	}()
 
 	claims := jwt.MapClaims{
 		"exp": r.Expiration.Unix(),

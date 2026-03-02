@@ -48,7 +48,7 @@ func TestServerLogin(t *testing.T) {
 	})
 
 	mux.Handle("/ims/token/v2", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `{
+		_, _ = fmt.Fprint(w, `{
 			"access_token": "access-token",
 			"refresh_token": "refresh-token",
 			"expires_in": 3600
@@ -90,7 +90,7 @@ func TestServerLogin(t *testing.T) {
 		if err != nil {
 			t.Errorf("perform initial request: %v", err)
 		}
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 	}()
 
 	select {
@@ -170,7 +170,7 @@ func TestServerError(t *testing.T) {
 		if err != nil {
 			t.Errorf("perform initial request: %v", err)
 		}
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 	}()
 
 	select {

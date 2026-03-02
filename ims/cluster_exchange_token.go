@@ -20,8 +20,9 @@ import (
 	"time"
 )
 
-// The cluster_at_exchange is an IMS specific grant type, that is used to exchange access tokens.
-// This is useful in the context of T2E compatibility. For more information see the IMS documentation.
+// ClusterExchangeRequest is the request for ClusterExchange.
+// The cluster_at_exchange grant type exchanges access tokens across IMS orgs
+// for T2E compatibility. See the IMS documentation for details.
 
 type ClusterExchangeRequest struct {
 	ClientID     string
@@ -32,12 +33,15 @@ type ClusterExchangeRequest struct {
 	OrgID        string
 }
 
+// ClusterExchangeResponse is the response for ClusterExchange.
 type ClusterExchangeResponse struct {
 	Response
 	AccessToken string
 	ExpiresIn   time.Duration
 }
 
+// ClusterExchangeWithContext exchanges an access token for another access
+// token in a different IMS organization.
 func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExchangeRequest) (*ClusterExchangeResponse, error) {
 
 	data := url.Values{}
@@ -91,6 +95,7 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 	}, nil
 }
 
+// ClusterExchange is equivalent to ClusterExchangeWithContext with a background context.
 func (c *Client) ClusterExchange(r *ClusterExchangeRequest) (*ClusterExchangeResponse, error) {
 	return c.ClusterExchangeWithContext(context.Background(), r)
 }

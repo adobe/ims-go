@@ -4,6 +4,60 @@ Thanks for choosing to contribute!
 
 The following are a set of guidelines to follow when contributing to this project.
 
+## Development
+
+```bash
+# Run all tests
+go test ./... -v
+
+# Run tests with race detection
+go test -race ./...
+
+# Static analysis
+go vet ./...
+
+# Build
+go build ./...
+```
+
+## CI Pipelines
+
+All pipelines are defined in `.github/workflows/`.
+
+### CI (`ci.yml`)
+
+**Triggers:** Every push to master/main and pull requests.
+
+Runs three parallel jobs:
+
+- **Test** — Runs `go test -race` with coverage across Go 1.21–1.25. Verifies dependency checksums with `go mod verify`. Prints a coverage summary to the log.
+- **Lint** — Runs `go vet` and [golangci-lint](https://golangci-lint.run/) for extended static analysis.
+- **Build** — Verifies the project compiles.
+
+### PR Title (`pr-title.yml`)
+
+**Triggers:** When a pull request is opened, edited, synchronized or reopened.
+
+Validates that the PR title follows the [Conventional Commits](https://www.conventionalcommits.org) format (e.g. `feat: add token refresh`, `fix(auth): handle expired tokens`). This is enforced because the repository is configured for **squash merging only** — the PR title becomes the commit message on `master`.
+
+### CodeQL (`codeql.yml`)
+
+**Triggers:** Every push, pull requests targeting master/main, and weekly on a cron schedule.
+
+Runs GitHub's CodeQL security analysis to detect vulnerabilities in the Go source code.
+
+### govulncheck (`govulncheck.yml`)
+
+**Triggers:** Every push to master/main, pull requests, and weekly on Monday at 9:00 UTC.
+
+Runs Go's official vulnerability scanner ([govulncheck](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)) against all packages. The job fails if any known vulnerabilities affect the code. The weekly schedule catches new vulnerabilities even when the code hasn't changed. If the scheduled scan fails, a GitHub issue labeled `security` is created automatically.
+
+## Repository Settings
+
+- **Squash merge only** — Merge commits and rebase merging are disabled. The PR title is used as the squash commit message, ensuring conventional commit messages land on `master`.
+- **Auto-delete branches** — Head branches are automatically deleted after a PR is merged.
+- **Renovate** — [Renovate](https://docs.renovatebot.com/) monitors `go.mod` for dependency updates and opens PRs automatically. Patch updates are auto-merged after CI passes. Minor and major updates require manual review. Configuration lives in `renovate.json`.
+
 ## Code Of Conduct
 
 This project adheres to the Adobe [code of conduct](../CODE_OF_CONDUCT.md). By participating,

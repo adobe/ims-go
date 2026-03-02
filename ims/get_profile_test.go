@@ -28,7 +28,7 @@ func TestGetProfile(t *testing.T) {
 			t.Fatalf("invalid authorization header: %v", v)
 		}
 
-		fmt.Fprint(w, `{"foo":"bar"}`)
+		_, _ = fmt.Fprint(w, `{"foo":"bar"}`)
 	}))
 	defer s.Close()
 

@@ -8,6 +8,9 @@
 // OF ANY KIND, either express or implied. See the License for the specific language
 // governing permissions and limitations under the License.
 
+// Package ims provides an HTTP client for the Adobe Identity Management
+// System (IMS) API. It supports token exchange, validation, invalidation,
+// refresh, JWT exchange, profile retrieval, and authorization URL generation.
 package ims
 
 import (
@@ -33,7 +36,8 @@ type Client struct {
 	client HTTPClient
 }
 
-// HTTPClient allows to use other extended http clients instead of the one provided by the http package
+// HTTPClient is an interface for performing HTTP requests. It allows custom
+// HTTP clients to be used instead of the default http.Client.
 type HTTPClient interface {
 	Do(r *http.Request) (*http.Response, error)
 }

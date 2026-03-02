@@ -29,7 +29,7 @@ func (h *resultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if h.successHandler != nil {
 			h.successHandler.ServeHTTP(w, r)
 		} else {
-			fmt.Fprintf(w, "Success!")
+			_, _ = fmt.Fprintf(w, "Success!")
 		}
 
 		select {
@@ -53,7 +53,7 @@ func (h *resultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.failureHandler != nil {
 		h.failureHandler.ServeHTTP(w, r)
 	} else {
-		fmt.Fprintf(w, "Error: %v", serverErr)
+		_, _ = fmt.Fprintf(w, "Error: %v", serverErr)
 	}
 
 	select {

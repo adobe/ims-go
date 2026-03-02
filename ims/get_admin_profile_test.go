@@ -46,7 +46,7 @@ func TestGetAdminProfile(t *testing.T) {
 			t.Fatalf("invalid auth_src: %v", authSrc)
 		}
 
-		fmt.Fprint(w, `{"foo":"bar"}`)
+		_, _ = fmt.Fprint(w, `{"foo":"bar"}`)
 	}))
 	defer s.Close()
 

@@ -50,7 +50,7 @@ func TestValidateToken(t *testing.T) {
 		default:
 			t.Fatalf("incorrect type of token")
 		}
-		fmt.Fprint(w, `{"foo":"bar"}`)
+		_, _ = fmt.Fprint(w, `{"foo":"bar"}`)
 	}))
 	defer s.Close()
 

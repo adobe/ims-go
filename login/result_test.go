@@ -74,7 +74,7 @@ func TestResultSuccessHandler(t *testing.T) {
 	h := &resultHandler{
 		resCh: resCh,
 		successHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, "custom")
+			_, _ = fmt.Fprint(w, "custom")
 		}),
 	}
 
@@ -98,7 +98,7 @@ func TestResultFailureHandler(t *testing.T) {
 	h := &resultHandler{
 		errCh: errCh,
 		failureHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, "custom")
+			_, _ = fmt.Fprint(w, "custom")
 		}),
 	}
 

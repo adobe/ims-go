@@ -8,6 +8,9 @@
 // OF ANY KIND, either express or implied. See the License for the specific language
 // governing permissions and limitations under the License.
 
+// Package login provides a local HTTP server that implements the OAuth 2.0
+// authorization code flow with Adobe IMS. It handles browser redirection,
+// callback processing, and token exchange.
 package login
 
 import (
