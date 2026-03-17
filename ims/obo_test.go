@@ -21,25 +21,20 @@ import (
 )
 
 func TestOBOExchange(t *testing.T) {
-	// Spin up a fake IMS server that validates what OBOExchange sends it
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// OBO requires POST, just like the other exchanges
 		if r.Method != http.MethodPost {
 			t.Fatalf("invalid method: %v", r.Method)
 		}
 
-		// This is the key difference from cluster — OBO needs /ims/token/v4, not v3
 		if r.URL.Path != "/ims/token/v4" {
 			t.Fatalf("invalid path: %v", r.URL.Path)
 		}
 
-		// client_id must also appear as a query parameter (your original logic does this)
 		v, ok := r.URL.Query()["client_id"]
 		if !ok || v[0] != "client-id" {
 			t.Fatalf("invalid client ID in query: %v", v)
 		}
 
-		// Now check all the POST body fields
 		if err := r.ParseForm(); err != nil {
 			t.Fatalf("parse form: %v", err)
 		}
@@ -65,7 +60,6 @@ func TestOBOExchange(t *testing.T) {
 			t.Fatalf("invalid scopes: %v", v)
 		}
 
-		// Return a successful response
 		body := struct {
 			AccessToken string `json:"access_token"`
 			ExpiresIn   int    `json:"expires_in"`
@@ -102,7 +96,6 @@ func TestOBOExchange(t *testing.T) {
 }
 
 func TestOBOExchangeError(t *testing.T) {
-	// Fake server that simulates IMS rejecting the request
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
@@ -131,7 +124,6 @@ func TestOBOExchangeError(t *testing.T) {
 		Scopes:       []string{"openid"},
 	})
 
-	// The library has a standard error type — use IsError just like the cluster tests do
 	imsErr, ok := ims.IsError(err)
 	if !ok {
 		t.Fatalf("expected IMS error")
@@ -197,17 +189,15 @@ func TestOBOExchangeTooManyRequests(t *testing.T) {
 }
 
 func TestOBOExchangeInvalidRequest(t *testing.T) {
-	// No fake server needed — validation should fail before any HTTP call is made
 	c, err := ims.NewClient(&ims.ClientConfig{URL: "http://ims.endpoint"})
 	if err != nil {
 		t.Fatalf("create client: %v", err)
 	}
 
-	// Test with a missing required field — for example, empty SubjectToken
 	_, err = c.OBOExchange(&ims.OBOExchangeRequest{
 		ClientID:     "client-id",
 		ClientSecret: "client-secret",
-		SubjectToken: "", // missing — this is the subject token, OBO can't work without it
+		SubjectToken: "",
 		Scopes:       []string{"openid"},
 	})
 	if err == nil {
