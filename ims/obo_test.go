@@ -11,6 +11,7 @@
 package ims_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -91,6 +92,55 @@ func TestOBOExchange(t *testing.T) {
 		t.Fatalf("invalid access token: %v", r.AccessToken)
 	}
 	if r.ExpiresIn != 3600*time.Second {
+		t.Fatalf("invalid expiration: %v", r.ExpiresIn)
+	}
+}
+
+func TestOBOExchangeWithContext(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("invalid method: %v", r.Method)
+		}
+		if r.URL.Path != "/ims/token/v4" {
+			t.Fatalf("invalid path: %v", r.URL.Path)
+		}
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if v := r.PostForm.Get("subject_token"); v != "user-token" {
+			t.Fatalf("invalid subject_token: %v", v)
+		}
+		body := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}{
+			AccessToken: "obo-with-ctx-token",
+			ExpiresIn:   1800,
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.OBOExchangeWithContext(context.Background(), &ims.OBOExchangeRequest{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		SubjectToken: "user-token",
+		Scopes:       []string{"openid", "profile"},
+	})
+	if err != nil {
+		t.Fatalf("failure exchanging token: %v", err)
+	}
+	if r.AccessToken != "obo-with-ctx-token" {
+		t.Fatalf("invalid access token: %v", r.AccessToken)
+	}
+	if r.ExpiresIn != 1800*time.Second {
 		t.Fatalf("invalid expiration: %v", r.ExpiresIn)
 	}
 }
