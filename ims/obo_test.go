@@ -1,4 +1,4 @@
-// Copyright 2019 Adobe. All rights reserved.
+// Copyright 2026 Adobe. All rights reserved.
 // This file is licensed to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy
 // of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -29,11 +29,6 @@ func TestOBOExchange(t *testing.T) {
 
 		if r.URL.Path != "/ims/token/v4" {
 			t.Fatalf("invalid path: %v", r.URL.Path)
-		}
-
-		v, ok := r.URL.Query()["client_id"]
-		if !ok || v[0] != "client-id" {
-			t.Fatalf("invalid client ID in query: %v", v)
 		}
 
 		if err := r.ParseForm(); err != nil {
@@ -244,13 +239,72 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	_, err = c.OBOExchange(&ims.OBOExchangeRequest{
-		ClientID:     "client-id",
-		ClientSecret: "client-secret",
-		SubjectToken: "",
-		Scopes:       []string{"openid"},
-	})
-	if err == nil {
-		t.Fatalf("expected error for missing SubjectToken")
+	tests := []struct {
+		name    string
+		request *ims.OBOExchangeRequest
+		wantErr string
+	}{
+		{
+			name: "missing ClientID",
+			request: &ims.OBOExchangeRequest{
+				ClientID:     "",
+				ClientSecret: "client-secret",
+				SubjectToken: "user-token",
+				Scopes:       []string{"openid"},
+			},
+			wantErr: "invalid parameters for On-Behalf-Of exchange: missing client ID parameter",
+		},
+		{
+			name: "missing ClientSecret",
+			request: &ims.OBOExchangeRequest{
+				ClientID:     "client-id",
+				ClientSecret: "",
+				SubjectToken: "user-token",
+				Scopes:       []string{"openid"},
+			},
+			wantErr: "invalid parameters for On-Behalf-Of exchange: missing client secret parameter",
+		},
+		{
+			name: "missing SubjectToken",
+			request: &ims.OBOExchangeRequest{
+				ClientID:     "client-id",
+				ClientSecret: "client-secret",
+				SubjectToken: "",
+				Scopes:       []string{"openid"},
+			},
+			wantErr: "invalid parameters for On-Behalf-Of exchange: missing subject token parameter (only access tokens are accepted)",
+		},
+		{
+			name: "empty Scopes",
+			request: &ims.OBOExchangeRequest{
+				ClientID:     "client-id",
+				ClientSecret: "client-secret",
+				SubjectToken: "user-token",
+				Scopes:       nil,
+			},
+			wantErr: "invalid parameters for On-Behalf-Of exchange: scopes are required for On-Behalf-Of exchange",
+		},
+		{
+			name: "single empty scope string",
+			request: &ims.OBOExchangeRequest{
+				ClientID:     "client-id",
+				ClientSecret: "client-secret",
+				SubjectToken: "user-token",
+				Scopes:       []string{""},
+			},
+			wantErr: "invalid parameters for On-Behalf-Of exchange: scopes are required for On-Behalf-Of exchange",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := c.OBOExchange(tt.request)
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if got := err.Error(); got != tt.wantErr {
+				t.Fatalf("error = %q, want %q", got, tt.wantErr)
+			}
+		})
 	}
 }

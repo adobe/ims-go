@@ -1,4 +1,4 @@
-// Copyright 2019 Adobe. All rights reserved.
+// Copyright 2026 Adobe. All rights reserved.
 // This file is licensed to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy
 // of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -67,7 +67,7 @@ func (c *Client) OBOExchangeWithContext(ctx context.Context, r *OBOExchangeReque
 	data.Set("requested_token_type", "urn:ietf:params:oauth:token-type:access_token")
 	data.Set("scope", strings.Join(r.Scopes, ","))
 
-	tokenURL := fmt.Sprintf("%s/ims/token/v4?client_id=%s", c.url, url.QueryEscape(r.ClientID))
+	tokenURL := fmt.Sprintf("%s/ims/token/v4", c.url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
