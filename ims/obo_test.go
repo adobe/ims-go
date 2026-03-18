@@ -252,7 +252,7 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 				SubjectToken: "user-token",
 				Scopes:       []string{"openid"},
 			},
-			wantErr: "invalid parameters for On-Behalf-Of exchange: missing client ID parameter",
+			wantErr: "missing client ID parameter",
 		},
 		{
 			name: "missing ClientSecret",
@@ -262,7 +262,7 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 				SubjectToken: "user-token",
 				Scopes:       []string{"openid"},
 			},
-			wantErr: "invalid parameters for On-Behalf-Of exchange: missing client secret parameter",
+			wantErr: "missing client secret parameter",
 		},
 		{
 			name: "missing SubjectToken",
@@ -272,7 +272,7 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 				SubjectToken: "",
 				Scopes:       []string{"openid"},
 			},
-			wantErr: "invalid parameters for On-Behalf-Of exchange: missing subject token parameter (only access tokens are accepted)",
+			wantErr: "missing subject token parameter (only access tokens are accepted)",
 		},
 		{
 			name: "empty Scopes",
@@ -282,7 +282,7 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 				SubjectToken: "user-token",
 				Scopes:       nil,
 			},
-			wantErr: "invalid parameters for On-Behalf-Of exchange: scopes are required for On-Behalf-Of exchange",
+			wantErr: "scopes are required for On-Behalf-Of exchange",
 		},
 		{
 			name: "single empty scope string",
@@ -292,7 +292,7 @@ func TestOBOExchangeInvalidRequest(t *testing.T) {
 				SubjectToken: "user-token",
 				Scopes:       []string{""},
 			},
-			wantErr: "invalid parameters for On-Behalf-Of exchange: scopes are required for On-Behalf-Of exchange",
+			wantErr: "scopes are required for On-Behalf-Of exchange",
 		},
 	}
 
