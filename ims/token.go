@@ -38,6 +38,8 @@ type TokenRequest struct {
 	Scope []string
 	// CodeVerifier to be sent if PKCE is used
 	CodeVerifier string
+	// The client credentials flow needs the IMS Org ID when the IMS Client is not owned by one IMS Org
+	OrgID string
 }
 
 // TokenResponse is the response returned after an access token request.
@@ -90,6 +92,11 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 
 	if len(r.Scope) > 0 {
 		data.Set("scope", strings.Join(r.Scope, ","))
+	}
+
+	// Optional, only needed for IMS clients not owned by one IMS Org
+	if r.GrantType == "client_credentials" && r.OrgID != "" {
+		data.Set("org_id", r.OrgID)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/token/v2", c.url), strings.NewReader(data.Encode()))
