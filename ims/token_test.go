@@ -253,6 +253,89 @@ func TestTokenNoClientID(t *testing.T) {
 	}
 }
 
+func TestTokenClientCredentialsWithOrgID(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if v := r.PostForm.Get("grant_type"); v != "client_credentials" {
+			t.Fatalf("invalid grant type: %v", v)
+		}
+		if v := r.PostForm.Get("org_id"); v != "orgID" {
+			t.Fatalf("invalid org_id: %v", v)
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+		}{
+			AccessToken: "accessToken",
+		}
+
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: s.URL,
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.Token(&ims.TokenRequest{
+		GrantType:    "client_credentials",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		OrgID:        "orgID",
+	})
+	if err != nil {
+		t.Fatalf("token: %v", err)
+	}
+	if r.AccessToken != "accessToken" {
+		t.Errorf("invalid access token: %v", r.AccessToken)
+	}
+}
+
+func TestTokenOrgIDNotSentForAuthorizationCode(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if v := r.PostForm.Get("org_id"); v != "" {
+			t.Fatalf("org_id should not be sent for authorization_code, got: %v", v)
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+		}{
+			AccessToken: "accessToken",
+		}
+
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: s.URL,
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	if _, err := c.Token(&ims.TokenRequest{
+		Code:         "code",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		OrgID:        "orgID",
+	}); err != nil {
+		t.Fatalf("token: %v", err)
+	}
+}
+
 func TestTokenNoClientSecretPrivateClient(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{
 		URL: "http://ims.endpoint",
