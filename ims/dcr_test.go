@@ -294,3 +294,74 @@ func TestDCRMultipleRedirectURIs(t *testing.T) {
 		t.Fatalf("invalid body: %v", string(resp.Body))
 	}
 }
+
+func TestDCRWithScopes(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			ClientName   string   `json:"client_name"`
+			RedirectURIs []string `json:"redirect_uris"`
+			Scope        string   `json:"scope"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if body.Scope != "openid profile" {
+			t.Fatalf("invalid scope: %v", body.Scope)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"client_id":"scoped-client"}`))
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	resp, err := c.DCR(&ims.DCRRequest{
+		ClientName:   "my-app",
+		RedirectURIs: []string{"https://example.com/callback"},
+		Scopes:       []string{"openid", "profile"},
+	})
+	if err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	if string(resp.Body) != `{"client_id":"scoped-client"}` {
+		t.Fatalf("invalid body: %v", string(resp.Body))
+	}
+}
+
+func TestDCRWithoutScopes(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if _, ok := body["scope"]; ok {
+			t.Fatalf("expected no scope field in payload, got: %v", body["scope"])
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"client_id":"no-scope-client"}`))
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	resp, err := c.DCR(&ims.DCRRequest{
+		ClientName:   "my-app",
+		RedirectURIs: []string{"https://example.com/callback"},
+	})
+	if err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	if string(resp.Body) != `{"client_id":"no-scope-client"}` {
+		t.Fatalf("invalid body: %v", string(resp.Body))
+	}
+}

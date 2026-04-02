@@ -16,11 +16,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type DCRRequest struct {
 	ClientName   string
 	RedirectURIs []string
+	Scopes       []string
 }
 
 type DCRResponse struct {
@@ -46,9 +48,11 @@ func (c *Client) DCRWithContext(ctx context.Context, r *DCRRequest) (*DCRRespons
 	payload, err := json.Marshal(struct {
 		ClientName   string   `json:"client_name"`
 		RedirectURIs []string `json:"redirect_uris"`
+		Scope        string   `json:"scope,omitempty"`
 	}{
 		ClientName:   r.ClientName,
 		RedirectURIs: r.RedirectURIs,
+		Scope:        strings.Join(r.Scopes, " "),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error building registration payload: %v", err)
