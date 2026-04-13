@@ -31,6 +31,7 @@ type ClusterExchangeRequest struct {
 	UserToken    string
 	UserID       string
 	OrgID        string
+	Resource     []string
 }
 
 // ClusterExchangeResponse is the response for ClusterExchange.
@@ -60,6 +61,10 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 		return nil, fmt.Errorf("no userID or OrgID parameters to perform the request")
 	}
 	data.Set("scope", strings.Join(r.Scopes, ","))
+
+	for _, res := range r.Resource {
+		data.Add("resource", res)
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		fmt.Sprintf("%s/ims/token/v3?client_id=%s", c.url, r.ClientID),

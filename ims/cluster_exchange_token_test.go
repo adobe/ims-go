@@ -93,6 +93,53 @@ func TestClusterExchange(t *testing.T) {
 	}
 }
 
+func TestClusterExchangeWithResource(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		resources := r.PostForm["resource"]
+		if len(resources) != 1 {
+			t.Fatalf("expected 1 resource value, got %d", len(resources))
+		}
+		if resources[0] != "https://api-alpha.example.com" {
+			t.Fatalf("invalid resource: %v", resources[0])
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}{
+			AccessToken: "cluster-resource-token",
+			ExpiresIn:   3600,
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.ClusterExchange(&ims.ClusterExchangeRequest{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		Scopes:       []string{"openid"},
+		UserToken:    "old-token",
+		OrgID:        "orgid",
+		Resource:     []string{"https://api-alpha.example.com"},
+	})
+	if err != nil {
+		t.Fatalf("failure exchanging token: %v", err)
+	}
+	if r.AccessToken != "cluster-resource-token" {
+		t.Fatalf("invalid access token: %v", r.AccessToken)
+	}
+}
+
 func TestClusterExchangeError(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)

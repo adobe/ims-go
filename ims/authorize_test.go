@@ -63,6 +63,67 @@ func TestAuthorizeURL(t *testing.T) {
 	}
 }
 
+func TestAuthorizeURLWithResource(t *testing.T) {
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: "http://ims.endpoint",
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	u, err := c.AuthorizeURL(&ims.AuthorizeURLConfig{
+		ClientID: "clientID",
+		Scope:    []string{"openid", "AdobeID"},
+		Resource: []string{"https://api-alpha.example.com", "https://api-beta.example.com"},
+	})
+	if err != nil {
+		t.Fatalf("authorize: %v", err)
+	}
+
+	authURL, err := url.Parse(u)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+
+	q := authURL.Query()
+	resources := q["resource"]
+	if len(resources) != 2 {
+		t.Fatalf("expected 2 resource values, got %d", len(resources))
+	}
+	if resources[0] != "https://api-alpha.example.com" {
+		t.Errorf("invalid first resource: %v", resources[0])
+	}
+	if resources[1] != "https://api-beta.example.com" {
+		t.Errorf("invalid second resource: %v", resources[1])
+	}
+}
+
+func TestAuthorizeURLWithoutResourceOmitsParam(t *testing.T) {
+	c, err := ims.NewClient(&ims.ClientConfig{
+		URL: "http://ims.endpoint",
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	u, err := c.AuthorizeURL(&ims.AuthorizeURLConfig{
+		ClientID: "clientID",
+		Scope:    []string{"openid"},
+	})
+	if err != nil {
+		t.Fatalf("authorize: %v", err)
+	}
+
+	authURL, err := url.Parse(u)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+
+	if _, ok := authURL.Query()["resource"]; ok {
+		t.Fatalf("resource should not be present when not set")
+	}
+}
+
 func TestAuthorizeURLNoClientID(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{
 		URL: "http://ims.endpoint",

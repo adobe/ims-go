@@ -73,6 +73,10 @@ type ServerConfig struct {
 	OnSuccess http.Handler
 	// Use PKCE in the authorization code flow.
 	UsePKCE bool
+	// Resource is the RFC 8707 resource indicator(s) for audience-restricted
+	// tokens. Sent on the authorize request to bind the resource to the
+	// authorization code. Optional.
+	Resource []string
 }
 
 // NewServer creates a new Server for the provided ServerConfig.
@@ -111,6 +115,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 			redirectURI:  cfg.RedirectURI,
 			next:         result,
 			codeVerifier: codeVerifier,
+			resource:     cfg.Resource,
 		},
 
 		callback: &callbackMiddleware{

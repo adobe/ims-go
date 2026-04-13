@@ -40,6 +40,7 @@ type AuthorizeURLConfig struct {
 	RedirectURI  string
 	State        string
 	CodeVerifier string
+	Resource     []string
 }
 
 // AuthorizeURL builds an authorization URL according to the provided configuration.
@@ -89,6 +90,10 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 		codeChallenge := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 		q.Set("code_challenge", codeChallenge)
 		q.Set("code_challenge_method", "S256")
+	}
+
+	for _, res := range cfg.Resource {
+		q.Add("resource", res)
 	}
 
 	apiURL.RawQuery = q.Encode()

@@ -30,6 +30,8 @@ type OBOExchangeRequest struct {
 	SubjectToken string
 
 	Scopes []string
+	
+	Resource []string
 }
 
 type OBOExchangeResponse struct {
@@ -66,6 +68,10 @@ func (c *Client) OBOExchangeWithContext(ctx context.Context, r *OBOExchangeReque
 	data.Set("subject_token_type", "urn:ietf:params:oauth:token-type:access_token")
 	data.Set("requested_token_type", "urn:ietf:params:oauth:token-type:access_token")
 	data.Set("scope", strings.Join(r.Scopes, ","))
+
+	for _, res := range r.Resource {
+		data.Add("resource", res)
+	}
 
 	tokenURL := fmt.Sprintf("%s/ims/token/v4", c.url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(data.Encode()))

@@ -233,6 +233,52 @@ func TestOBOExchangeTooManyRequests(t *testing.T) {
 	}
 }
 
+func TestOBOExchangeWithResource(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		resources := r.PostForm["resource"]
+		if len(resources) != 1 {
+			t.Fatalf("expected 1 resource value, got %d", len(resources))
+		}
+		if resources[0] != "https://api-alpha.example.com" {
+			t.Fatalf("invalid resource: %v", resources[0])
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}{
+			AccessToken: "obo-resource-token",
+			ExpiresIn:   3600,
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.OBOExchange(&ims.OBOExchangeRequest{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		SubjectToken: "user-token",
+		Scopes:       []string{"openid"},
+		Resource:     []string{"https://api-alpha.example.com"},
+	})
+	if err != nil {
+		t.Fatalf("failure exchanging token: %v", err)
+	}
+	if r.AccessToken != "obo-resource-token" {
+		t.Fatalf("invalid access token: %v", r.AccessToken)
+	}
+}
+
 func TestOBOExchangeInvalidRequest(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{URL: "http://ims.endpoint"})
 	if err != nil {
