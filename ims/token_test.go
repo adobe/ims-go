@@ -336,6 +336,86 @@ func TestTokenOrgIDNotSentForAuthorizationCode(t *testing.T) {
 	}
 }
 
+func TestTokenWithResource(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		resources := r.PostForm["resource"]
+		if len(resources) != 2 {
+			t.Fatalf("expected 2 resource values, got %d", len(resources))
+		}
+		if resources[0] != "https://api-alpha.example.com" {
+			t.Fatalf("invalid first resource: %v", resources[0])
+		}
+		if resources[1] != "https://api-beta.example.com" {
+			t.Fatalf("invalid second resource: %v", resources[1])
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+		}{
+			AccessToken: "accessToken",
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	r, err := c.Token(&ims.TokenRequest{
+		GrantType:    "client_credentials",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		Resource:     []string{"https://api-alpha.example.com", "https://api-beta.example.com"},
+	})
+	if err != nil {
+		t.Fatalf("token: %v", err)
+	}
+	if r.AccessToken != "accessToken" {
+		t.Errorf("invalid access token: %v", r.AccessToken)
+	}
+}
+
+func TestTokenWithoutResourceOmitsParam(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if _, ok := r.PostForm["resource"]; ok {
+			t.Fatalf("resource should not be present when not set")
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+		}{
+			AccessToken: "accessToken",
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	if _, err := c.Token(&ims.TokenRequest{
+		Code:         "code",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+	}); err != nil {
+		t.Fatalf("token: %v", err)
+	}
+}
+
 func TestTokenNoClientSecretPrivateClient(t *testing.T) {
 	c, err := ims.NewClient(&ims.ClientConfig{
 		URL: "http://ims.endpoint",

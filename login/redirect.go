@@ -29,6 +29,7 @@ type redirectMiddleware struct {
 	redirectURI  string
 	next         http.Handler
 	codeVerifier string
+	resource     []string
 }
 
 func (h *redirectMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +40,7 @@ func (h *redirectMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		State:        h.state,
 		RedirectURI:  h.redirectURI,
 		CodeVerifier: h.codeVerifier,
+		Resource:     h.resource,
 	})
 	if err != nil {
 		serveError(h.next, w, r, fmt.Errorf("generate authorization URL: %v", err))
