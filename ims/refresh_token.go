@@ -32,8 +32,6 @@ type RefreshTokenRequest struct {
 	// Scope is the scope list in the refresh token. This field is optional. If
 	// provided, it must be a subset of the scopes in the request token.
 	Scope []string
-
-	Resource []string
 }
 
 // RefreshTokenResponse is the response of an access token refresh.
@@ -70,10 +68,6 @@ func (c *Client) RefreshTokenWithContext(ctx context.Context, r *RefreshTokenReq
 
 	if len(r.Scope) > 0 {
 		data.Set("scope", strings.Join(r.Scope, ","))
-	}
-
-	for _, res := range r.Resource {
-		data.Add("resource", res)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/token/v2", c.url), strings.NewReader(data.Encode()))

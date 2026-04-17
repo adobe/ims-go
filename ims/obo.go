@@ -23,15 +23,11 @@ import (
 const defaultOBOGrantType = "urn:ietf:params:oauth:grant-type:token-exchange"
 
 type OBOExchangeRequest struct {
-	ClientID string
-
+	ClientID     string
 	ClientSecret string
-
 	SubjectToken string
-
-	Scopes []string
-	
-	Resource []string
+	Scopes       []string
+	Resource     []string
 }
 
 type OBOExchangeResponse struct {
