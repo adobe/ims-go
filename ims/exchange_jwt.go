@@ -65,6 +65,8 @@ type ExchangeJWTRequest struct {
 	MetaScope []MetaScope
 	// Additional claims to add to the JWT token.
 	Claims map[string]interface{}
+	// Resources provided to be added as access token audiences
+	Resources []string
 }
 
 // ExchangeJWTResponse contains the response of a successful exchange of a JWT

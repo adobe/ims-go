@@ -40,7 +40,7 @@ type TokenRequest struct {
 	CodeVerifier string
 	// The client credentials flow needs the IMS Org ID when the IMS Client is not owned by one IMS Org
 	OrgID string
-
+	// Resources provided to be added as access token audiences
 	Resource []string
 }
 
