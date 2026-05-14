@@ -131,6 +131,10 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 	data.Set("client_secret", r.ClientSecret)
 	data.Set("jwt_token", signed)
 
+	for _, res := range r.Resources {
+		data.Add("resource", res)
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/exchange/v1/jwt", c.url), strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %v", err)
