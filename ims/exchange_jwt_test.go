@@ -172,3 +172,89 @@ func TestExchangeJWTInvalidMetaScope(t *testing.T) {
 		t.Fatalf("invalid error: %v", err)
 	}
 }
+
+func TestExchangeJWTWithResources(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		resources := r.PostForm["resource"]
+		if len(resources) != 2 {
+			t.Fatalf("expected 2 resource values, got %d", len(resources))
+		}
+		if resources[0] != "https://api-alpha.example.com" {
+			t.Fatalf("invalid first resource: %v", resources[0])
+		}
+		if resources[1] != "https://api-beta.example.com" {
+			t.Fatalf("invalid second resource: %v", resources[1])
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}{
+			AccessToken: "access-token",
+			ExpiresIn:   3600000,
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	if _, err := c.ExchangeJWT(&ims.ExchangeJWTRequest{
+		PrivateKey:   newPrivateKey(t),
+		Expiration:   time.Now().Add(24 * time.Hour),
+		Issuer:       "organization",
+		Subject:      "technical-user",
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		Resources:    []string{"https://api-alpha.example.com", "https://api-beta.example.com"},
+	}); err != nil {
+		t.Fatalf("exchange JWT: %v", err)
+	}
+}
+
+func TestExchangeJWTWithoutResourcesOmitsParam(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Fatalf("parse form: %v", err)
+		}
+		if _, ok := r.PostForm["resource"]; ok {
+			t.Fatalf("resource should not be present when not set")
+		}
+
+		body := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}{
+			AccessToken: "access-token",
+			ExpiresIn:   3600000,
+		}
+		if err := json.NewEncoder(w).Encode(&body); err != nil {
+			t.Fatalf("encode response: %v", err)
+		}
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	if _, err := c.ExchangeJWT(&ims.ExchangeJWTRequest{
+		PrivateKey:   newPrivateKey(t),
+		Expiration:   time.Now().Add(24 * time.Hour),
+		Issuer:       "organization",
+		Subject:      "technical-user",
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+	}); err != nil {
+		t.Fatalf("exchange JWT: %v", err)
+	}
+}
