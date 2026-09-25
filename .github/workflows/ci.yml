@@ -64,7 +64,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.13.2
+          version: v2.14.0
 
   # Verify the project compiles on the minimum supported Go version.
   build:
