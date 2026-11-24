@@ -93,7 +93,7 @@ func (c *Client) do(req *http.Request) (_ *Response, e error) {
 
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			e = errors.Join(e, fmt.Errorf("close body: %v", err))
+			e = errors.Join(e, fmt.Errorf("close body: %w", err))
 		}
 	}()
 
@@ -104,7 +104,7 @@ func (c *Client) do(req *http.Request) (_ *Response, e error) {
 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("read response body: %v", err)
+		return nil, fmt.Errorf("read response body: %w", err)
 	}
 
 	// X-Debug-Id is the header used by IMS to track requests.

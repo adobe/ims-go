@@ -70,14 +70,14 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 		fmt.Sprintf("%s/ims/token/v3?client_id=%s", c.url, r.ClientID),
 		strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error performing request: %v", err)
+		return nil, fmt.Errorf("error performing request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -90,7 +90,7 @@ func (c *Client) ClusterExchangeWithContext(ctx context.Context, r *ClusterExcha
 	}
 
 	if err := json.Unmarshal(res.Body, &body); err != nil {
-		return nil, fmt.Errorf("error decoding response: %v", err)
+		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
 	return &ClusterExchangeResponse{

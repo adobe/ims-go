@@ -61,7 +61,7 @@ func (c *Client) GetAdminOrganizationsWithContext(ctx context.Context, r *GetAdm
 		fmt.Sprintf("%s/ims/admin_organizations/%s", c.url, r.ApiVersion),
 		strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", r.ServiceToken))
@@ -70,7 +70,7 @@ func (c *Client) GetAdminOrganizationsWithContext(ctx context.Context, r *GetAdm
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {

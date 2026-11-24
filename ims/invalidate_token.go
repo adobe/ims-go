@@ -64,7 +64,7 @@ func (c *Client) InvalidateTokenWithContext(ctx context.Context, r *InvalidateTo
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/invalidate_token/v2", c.url),
 		strings.NewReader(data.Encode()))
 	if err != nil {
-		return fmt.Errorf("create request: %v", err)
+		return fmt.Errorf("create request: %w", err)
 	}
 
 	// Header X-IMS-ClientID will be mandatory in the future
@@ -73,7 +73,7 @@ func (c *Client) InvalidateTokenWithContext(ctx context.Context, r *InvalidateTo
 
 	res, err := c.do(req)
 	if err != nil {
-		return fmt.Errorf("perform request: %v", err)
+		return fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {

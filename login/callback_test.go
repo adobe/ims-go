@@ -11,6 +11,7 @@
 package login
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -173,11 +174,41 @@ func TestCallbackMissingCode(t *testing.T) {
 	m.ServeHTTP(nil, httptest.NewRequest(http.MethodGet, target, nil))
 }
 
-func TestCallbackBackendError(t *testing.T) {
+func TestCallbackIMSError(t *testing.T) {
+	backendErr := &ims.Error{
+		Response:  ims.Response{StatusCode: http.StatusBadRequest},
+		ErrorCode: "invalid_grant",
+	}
 	m := &callbackMiddleware{
 		state: "state",
 		client: testCallbackBackend(func(r *ims.TokenRequest) (*ims.TokenResponse, error) {
-			return nil, fmt.Errorf("error")
+			return nil, backendErr
+		}),
+		next: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			err, _ := r.Context().Value(contextKeyError).(error)
+			imsErr, ok := ims.IsError(err)
+			if !ok || imsErr != backendErr {
+				t.Fatalf("expected original IMS error, got %v", err)
+			}
+			if err.Error() != "obtaining access token: "+backendErr.Error() {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		}),
+	}
+
+	target := urlWithParams("/", map[string]string{
+		"state": "state",
+		"code":  "code",
+	})
+	m.ServeHTTP(nil, httptest.NewRequest(http.MethodGet, target, nil))
+}
+
+func TestCallbackBackendError(t *testing.T) {
+	backendErr := fmt.Errorf("error")
+	m := &callbackMiddleware{
+		state: "state",
+		client: testCallbackBackend(func(r *ims.TokenRequest) (*ims.TokenResponse, error) {
+			return nil, backendErr
 		}),
 		next: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			err, ok := r.Context().Value(contextKeyError).(error)
@@ -186,6 +217,9 @@ func TestCallbackBackendError(t *testing.T) {
 			}
 			if err == nil {
 				t.Fatalf("no error returned")
+			}
+			if !errors.Is(err, backendErr) {
+				t.Fatalf("expected backend error, got %v", err)
 			}
 			if err.Error() != "obtaining access token: error" {
 				t.Fatalf("invalid error: %v", err)

@@ -107,14 +107,14 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/token/v2", c.url), strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -129,7 +129,7 @@ func (c *Client) TokenWithContext(ctx context.Context, r *TokenRequest) (*TokenR
 	}
 
 	if err := json.Unmarshal(res.Body, &payload); err != nil {
-		return nil, fmt.Errorf("decode response: %v", err)
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	return &TokenResponse{

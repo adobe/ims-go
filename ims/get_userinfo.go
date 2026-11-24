@@ -37,14 +37,14 @@ func (c *Client) GetUserInfoWithContext(ctx context.Context, r *GetUserInfoReque
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ims/userinfo/%s", c.url, r.ApiVersion), nil)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", r.AccessToken))
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {

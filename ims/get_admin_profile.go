@@ -60,7 +60,7 @@ func (c *Client) GetAdminProfileWithContext(ctx context.Context, r *GetAdminProf
 		fmt.Sprintf("%s/ims/admin_profile/%s", c.url, r.ApiVersion),
 		strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", r.ServiceToken))
@@ -69,7 +69,7 @@ func (c *Client) GetAdminProfileWithContext(ctx context.Context, r *GetAdminProf
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {

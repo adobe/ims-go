@@ -65,7 +65,7 @@ func (h *callbackMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		CodeVerifier: h.codeVerifier,
 	})
 	if err != nil {
-		serveError(h.next, w, r, fmt.Errorf("obtaining access token: %v", err))
+		serveError(h.next, w, r, fmt.Errorf("obtaining access token: %w", err))
 		return
 	}
 

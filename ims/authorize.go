@@ -55,7 +55,7 @@ func (c *Client) AuthorizeURL(cfg *AuthorizeURLConfig) (string, error) {
 
 	apiURL, err := url.Parse(fmt.Sprintf("%s/ims/authorize/v1", c.url))
 	if err != nil {
-		return "", fmt.Errorf("parse URL: %v", err)
+		return "", fmt.Errorf("parse URL: %w", err)
 	}
 
 	q := apiURL.Query()

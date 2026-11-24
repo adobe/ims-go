@@ -12,6 +12,7 @@ package ims_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -214,6 +215,31 @@ func TestTokenError(t *testing.T) {
 	}
 	if imsErr.ErrorMessage != "errorMessage" {
 		t.Fatalf("invalid error message: %v", imsErr.ErrorMessage)
+	}
+}
+
+func TestTokenDecodeErrorCause(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("{"))
+	}))
+	defer s.Close()
+
+	c, err := ims.NewClient(&ims.ClientConfig{URL: s.URL})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+
+	_, err = c.Token(&ims.TokenRequest{
+		Code:         "code",
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+	})
+	var syntaxErr *json.SyntaxError
+	if !errors.As(err, &syntaxErr) {
+		t.Fatalf("expected JSON syntax error, got %v", err)
+	}
+	if err.Error() != "decode response: unexpected end of JSON input" {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
