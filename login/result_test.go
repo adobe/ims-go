@@ -109,7 +109,11 @@ func TestResultFailureHandler(t *testing.T) {
 
 	go h.ServeHTTP(w, r)
 
-	<-errCh
+	if err := <-errCh; err == nil {
+		t.Fatalf("error expected")
+	} else if err.Error() != "error" {
+		t.Fatalf("invalid error: %v", err)
+	}
 
 	if s := w.Body.String(); s != "custom" {
 		t.Fatalf("invalid body: %v", s)
