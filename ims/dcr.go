@@ -42,7 +42,7 @@ func (c *Client) validateDCRRequest(r *DCRRequest) error {
 
 func (c *Client) DCRWithContext(ctx context.Context, r *DCRRequest) (*DCRResponse, error) {
 	if err := c.validateDCRRequest(r); err != nil {
-		return nil, fmt.Errorf("invalid parameters for client registration: %v", err)
+		return nil, fmt.Errorf("invalid parameters for client registration: %w", err)
 	}
 
 	payload, err := json.Marshal(struct {
@@ -55,19 +55,19 @@ func (c *Client) DCRWithContext(ctx context.Context, r *DCRRequest) (*DCRRespons
 		Scope:        strings.Join(r.Scopes, " "),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error building registration payload: %v", err)
+		return nil, fmt.Errorf("error building registration payload: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		fmt.Sprintf("%s/ims/register", c.url), bytes.NewReader(payload))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error performing request: %v", err)
+		return nil, fmt.Errorf("error performing request: %w", err)
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {

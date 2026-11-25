@@ -65,7 +65,7 @@ func (c *Client) validatePromiseTokenRequest(r *PromiseTokenRequest) error {
 // PromiseTokenWithContext exchanges an access token for a promise token.
 func (c *Client) PromiseTokenWithContext(ctx context.Context, r *PromiseTokenRequest) (*PromiseTokenResponse, error) {
 	if err := c.validatePromiseTokenRequest(r); err != nil {
-		return nil, fmt.Errorf("invalid parameters for promise token exchange: %v", err)
+		return nil, fmt.Errorf("invalid parameters for promise token exchange: %w", err)
 	}
 
 	data := url.Values{}
@@ -79,13 +79,13 @@ func (c *Client) PromiseTokenWithContext(ctx context.Context, r *PromiseTokenReq
 	tokenURL := fmt.Sprintf("%s/ims/token/v4", c.url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error performing request: %v", err)
+		return nil, fmt.Errorf("error performing request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -99,7 +99,7 @@ func (c *Client) PromiseTokenWithContext(ctx context.Context, r *PromiseTokenReq
 		ExpiresIn    int    `json:"expires_in"`
 	}
 	if err := json.Unmarshal(res.Body, &body); err != nil {
-		return nil, fmt.Errorf("decode response: %v", err)
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	return &PromiseTokenResponse{
@@ -157,7 +157,7 @@ func (c *Client) validatePromiseExchangeRequest(r *PromiseExchangeRequest) error
 // PromiseExchangeWithContext exchanges a promise token for a new access token.
 func (c *Client) PromiseExchangeWithContext(ctx context.Context, r *PromiseExchangeRequest) (*PromiseExchangeResponse, error) {
 	if err := c.validatePromiseExchangeRequest(r); err != nil {
-		return nil, fmt.Errorf("invalid parameters for promise exchange: %v", err)
+		return nil, fmt.Errorf("invalid parameters for promise exchange: %w", err)
 	}
 
 	data := url.Values{}
@@ -170,13 +170,13 @@ func (c *Client) PromiseExchangeWithContext(ctx context.Context, r *PromiseExcha
 	tokenURL := fmt.Sprintf("%s/ims/token/v4", c.url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error performing request: %v", err)
+		return nil, fmt.Errorf("error performing request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -193,7 +193,7 @@ func (c *Client) PromiseExchangeWithContext(ctx context.Context, r *PromiseExcha
 		PromiseTokenExpiresIn int    `json:"promise_token_expires_in"`
 	}
 	if err := json.Unmarshal(res.Body, &body); err != nil {
-		return nil, fmt.Errorf("decode response: %v", err)
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	return &PromiseExchangeResponse{

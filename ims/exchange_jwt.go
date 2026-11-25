@@ -83,7 +83,7 @@ type ExchangeJWTResponse struct {
 func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTRequest) (*ExchangeJWTResponse, error) {
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(r.PrivateKey)
 	if err != nil {
-		return nil, fmt.Errorf("parse key: %v", err)
+		return nil, fmt.Errorf("parse key: %w", err)
 	}
 	// Zero the parsed private key after use to reduce the window where
 	// sensitive key material remains in memory.
@@ -122,7 +122,7 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 
 	signed, err := token.SignedString(key)
 	if err != nil {
-		return nil, fmt.Errorf("sign token: %v", err)
+		return nil, fmt.Errorf("sign token: %w", err)
 	}
 
 	data := url.Values{}
@@ -137,14 +137,14 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/exchange/v1/jwt", c.url), strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -157,7 +157,7 @@ func (c *Client) ExchangeJWTWithContext(ctx context.Context, r *ExchangeJWTReque
 	}
 
 	if err := json.Unmarshal(res.Body, &body); err != nil {
-		return nil, fmt.Errorf("decode response: %v", err)
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	return &ExchangeJWTResponse{

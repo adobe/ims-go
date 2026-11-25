@@ -83,14 +83,14 @@ type ServerConfig struct {
 func NewServer(cfg *ServerConfig) (*Server, error) {
 	state, err := randomState()
 	if err != nil {
-		return nil, fmt.Errorf("generate random state: %v", err)
+		return nil, fmt.Errorf("generate random state: %w", err)
 	}
 
 	codeVerifier := ""
 	if cfg.UsePKCE {
 		codeVerifier, err = randomCodeVerifier()
 		if err != nil {
-			return nil, fmt.Errorf("generate random code verifier: %v", err)
+			return nil, fmt.Errorf("generate random code verifier: %w", err)
 		}
 	}
 
@@ -169,7 +169,7 @@ func randomState() (string, error) {
 	binaryData := make([]byte, 128)
 
 	if _, err := rand.Read(binaryData); err != nil {
-		return "", fmt.Errorf("error generating state parameter: %v", err)
+		return "", fmt.Errorf("error generating state parameter: %w", err)
 	}
 
 	return base64.StdEncoding.EncodeToString(binaryData), nil
@@ -181,7 +181,7 @@ func randomCodeVerifier() (string, error) {
 	binaryData := make([]byte, 32)
 
 	if _, err := rand.Read(binaryData); err != nil {
-		return "", fmt.Errorf("error generating code verifier parameter: %v", err)
+		return "", fmt.Errorf("error generating code verifier parameter: %w", err)
 	}
 
 	return base64.RawURLEncoding.EncodeToString(binaryData), nil

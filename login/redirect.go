@@ -43,7 +43,7 @@ func (h *redirectMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Resource:     h.resource,
 	})
 	if err != nil {
-		serveError(h.next, w, r, fmt.Errorf("generate authorization URL: %v", err))
+		serveError(h.next, w, r, fmt.Errorf("generate authorization URL: %w", err))
 		return
 	}
 

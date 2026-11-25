@@ -53,7 +53,7 @@ func (c *Client) validateOBOExchangeRequest(r *OBOExchangeRequest) error {
 
 func (c *Client) OBOExchangeWithContext(ctx context.Context, r *OBOExchangeRequest) (*OBOExchangeResponse, error) {
 	if err := c.validateOBOExchangeRequest(r); err != nil {
-		return nil, fmt.Errorf("invalid parameters for On-Behalf-Of exchange: %v", err)
+		return nil, fmt.Errorf("invalid parameters for On-Behalf-Of exchange: %w", err)
 	}
 
 	data := url.Values{}
@@ -72,13 +72,13 @@ func (c *Client) OBOExchangeWithContext(ctx context.Context, r *OBOExchangeReque
 	tokenURL := fmt.Sprintf("%s/ims/token/v4", c.url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error performing request: %v", err)
+		return nil, fmt.Errorf("error performing request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -90,7 +90,7 @@ func (c *Client) OBOExchangeWithContext(ctx context.Context, r *OBOExchangeReque
 		ExpiresIn   int    `json:"expires_in"`
 	}
 	if err := json.Unmarshal(res.Body, &body); err != nil {
-		return nil, fmt.Errorf("decode response: %v", err)
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	return &OBOExchangeResponse{

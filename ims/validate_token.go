@@ -51,7 +51,7 @@ func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenR
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/ims/validate_token/v1", c.url), strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %v", err)
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	// Header X-IMS-ClientID will be mandatory in the future
@@ -60,7 +60,7 @@ func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenR
 
 	res, err := c.do(req)
 	if err != nil {
-		return nil, fmt.Errorf("perform request: %v", err)
+		return nil, fmt.Errorf("perform request: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -72,7 +72,7 @@ func (c *Client) ValidateTokenWithContext(ctx context.Context, r *ValidateTokenR
 	}
 
 	if err := json.Unmarshal(res.Body, &payload); err != nil {
-		return nil, fmt.Errorf("error parsing response: %v", err)
+		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
 	return &ValidateTokenResponse{
